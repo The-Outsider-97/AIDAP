@@ -1,0 +1,8 @@
+# Runtime dependencies of AIDAP itself. Run from the SLAI repository with SLAI's own requirements installed as well
+# (SLAI supplies the agents, checkpointing and src/functions). Python 3.10+.
+starlette>=0.37
+uvicorn>=0.29
+PyYAML>=6.0
+cryptography>=42.0
+python-multipart>=0.0.9
+colorama>=0.4.6        # SLAI's logger calls colorama.just_fix_windows_console (older versions raise AttributeError on import)

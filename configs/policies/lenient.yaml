@@ -1,0 +1,20 @@
+id: lenient
+name: Lenient (exploration)
+description: For internal exploration with non-sensitive data. Medium findings are recorded but do not hold the input. Do not use for sensitive data.
+mode: enforce
+severity_effects:
+  critical: quarantine
+  high: review
+  medium: pass
+  low: pass
+  info: pass
+unknown_mandatory_effect: review
+min_coverage: 0.8
+decision_valid_hours: 2160
+model_assist: false
+external_inference: false
+exceptions:
+  - id: broad
+    codes: ["temporal.*", "quality.*", "semantic.*", "fitness.*", "privacy.pii.*", "incomplete.*", "intake.*"]
+    max_days: 90
+    role: reviewer

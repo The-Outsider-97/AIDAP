@@ -1,0 +1,10 @@
+# Plan overrides. The defaults in domain/accounts/plans.py are the whitepaper's pricing HYPOTHESES (EUR / month,
+# excluding VAT). Anything listed here replaces the default for that plan - no code change or release needed.
+# Enterprise is quoted individually and never self-served. Keys per plan:
+#   price_month_cents, included_runs, included_scan_gb, inference_allowance_cents, max_projects,
+#   evidence_retention_days, max_run_mb, seats, features, tagline, support, highlights
+currency: EUR
+plans: {}
+# Example (commented out): raise Starter's run allowance
+#  starter:
+#    included_runs: 1500

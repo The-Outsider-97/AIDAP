@@ -1,0 +1,44 @@
+# Standard enforcing policy. Customers fork this into their own versioned policy; published versions are immutable.
+id: standard
+name: Standard
+description: Balanced default. High and medium findings are held for review; critical findings are isolated.
+mode: enforce
+severity_effects:
+  critical: quarantine
+  high: review
+  medium: review
+  low: pass
+  info: pass
+unknown_mandatory_effect: review
+min_coverage: 0.95
+decision_valid_hours: 720
+model_assist: false
+external_inference: false
+require_baseline: false
+require_av_scan: false
+exceptions:
+  - id: freshness
+    codes: ["temporal.*"]
+    max_days: 30
+    role: reviewer
+  - id: quality
+    codes: ["quality.*", "semantic.*", "intake.parse_incomplete", "intake.ragged_rows", "intake.encoding"]
+    max_days: 30
+    role: reviewer
+  - id: fitness
+    codes: ["fitness.*", "provenance.no_owner", "provenance.no_source", "provenance.unverified_origin"]
+    max_days: 30
+    role: admin
+  - id: personal-data
+    codes: ["privacy.pii.*", "privacy.destination.*"]
+    max_days: 14
+    role: security
+  - id: completeness
+    codes: ["incomplete.*"]
+    max_days: 7
+    role: reviewer
+  - id: injection-heuristics
+    codes: ["safety.injection.override.*", "safety.injection.hidden_text", "safety.injection.bidi_control",
+            "safety.injection.invisible_text", "safety.injection.shell_pipe"]
+    max_days: 14
+    role: security

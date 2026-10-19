@@ -1,0 +1,22 @@
+id: rag_indexing
+name: Documents before RAG indexing
+task: rag_indexing
+description: "Gate documents and passages before they enter a retrieval index. Requires an owner, a revision and an effective date, and rejects stale, superseded or personal-data-bearing content."
+audience: [internal_employees, customers]
+source_classes: [published, internal_doc, third_party]
+max_classification: internal
+destinations: [local_index]
+freshness_days: 365
+required_metadata: [owner, source_revision, effective_date]
+text_fields: [body, text, content]
+privacy:
+  purpose: retrieval_augmented_answers
+  allowed_types: []
+  redact_instead_of_block: true
+required_checks: [intake.format, quality.structural, quality.metadata, temporal.freshness, temporal.supersession, privacy.pii, safety.injection]
+optional_checks: [quality.duplicates, semantic.conflicts, provenance.origin, slai.quality, slai.privacy, slai.safety, slai.provenance, slai.semantic]
+thresholds:
+  min_text_chars: 50
+  max_duplicate_ratio: 0.05
+uncertainty: strict
+tags: [rag]

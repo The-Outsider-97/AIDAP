@@ -1,0 +1,19 @@
+id: knowledge_base_update
+name: Knowledge-base update
+task: knowledge_base_update
+description: "Recurring updates to an existing knowledge base. Superseded revisions and conflicting statements are treated as defects."
+audience: [internal_employees]
+source_classes: [internal_doc, published]
+max_classification: internal
+destinations: [local_index, internal_model]
+freshness_days: 730
+required_metadata: [owner, source_revision]
+text_fields: [body, text, content]
+privacy:
+  purpose: internal_knowledge
+  allowed_types: [email]
+required_checks: [intake.format, quality.structural, quality.metadata, temporal.supersession, privacy.pii, safety.injection]
+optional_checks: [temporal.freshness, quality.duplicates, semantic.conflicts, provenance.origin, slai.quality, slai.privacy, slai.safety, slai.provenance]
+thresholds:
+  min_text_chars: 30
+  max_duplicate_ratio: 0.1

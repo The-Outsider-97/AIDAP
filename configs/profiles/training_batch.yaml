@@ -1,0 +1,18 @@
+id: training_batch
+name: Training-data batch
+task: training_batch
+description: "Training batches: schema, leakage heuristics, duplicates and population change against an APPROVED baseline. Without an approved baseline the drift check is unresolved and the batch is held."
+audience: [ml_engineers]
+source_classes: [customer_upload, internal_doc, third_party, generated]
+max_classification: confidential
+destinations: [training_set]
+privacy:
+  purpose: model_training
+  allowed_types: []
+required_checks: [intake.format, quality.structural, quality.statistical, quality.duplicates, quality.anomaly, privacy.pii, safety.injection]
+optional_checks: [semantic.rules, quality.relationship, slai.quality, slai.privacy, slai.safety]
+thresholds:
+  min_records: 30
+  max_missing_ratio: 0.1
+  max_duplicate_ratio: 0.02
+  anomaly_effect_size: 0.5

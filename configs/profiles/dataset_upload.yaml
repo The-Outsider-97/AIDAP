@@ -1,0 +1,18 @@
+id: dataset_upload
+name: Customer dataset upload
+task: dataset_upload
+description: "Validate uploaded CSV/JSON datasets: field rules, missingness, duplicates and size, with row- and field-level evidence."
+audience: [analysts]
+source_classes: [customer_upload, internal_doc, third_party]
+max_classification: confidential
+destinations: [local_index, internal_model, training_set]
+privacy:
+  purpose: analytics
+  allowed_types: []
+fields: []
+required_checks: [intake.format, quality.structural, quality.statistical, quality.duplicates, privacy.pii, safety.injection]
+optional_checks: [quality.relationship, quality.anomaly, slai.quality, slai.privacy, slai.safety]
+thresholds:
+  min_records: 10
+  max_missing_ratio: 0.2
+  max_duplicate_ratio: 0.05

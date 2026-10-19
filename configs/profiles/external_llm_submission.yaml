@@ -1,0 +1,16 @@
+id: external_llm_submission
+name: PII before external LLM use
+task: external_llm_submission
+description: "Screen locally, evaluate the destination, redact supported entities, and re-check the transformed payload before any provider sees it. Credentials are blocked, never redacted into release."
+audience: [internal_employees]
+source_classes: [internal_doc, published, customer_upload]
+max_classification: internal
+destinations: [external_model]
+privacy:
+  purpose: external_model_assistance
+  allowed_types: []
+  redact_instead_of_block: true
+required_checks: [intake.format, privacy.pii, privacy.destination, safety.injection, safety.file, fitness.intended_use]
+optional_checks: [quality.structural, slai.privacy, slai.safety]
+thresholds:
+  min_text_chars: 1

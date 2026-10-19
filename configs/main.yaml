@@ -1,1 +1,34 @@
-
+# Default runtime configuration. Every value can be overridden by an AIDAP_* environment variable
+# (see .env.example). Secrets are NEVER read from this file.
+app:
+  name: AIDAP
+  environment: development        # development | production
+  base_url: http://127.0.0.1:8780
+  business_email: info.remy3design@gmail.com
+server:
+  host: 127.0.0.1
+  port: 8780
+data:
+  dir: ./var
+workers:
+  inline: true                    # run jobs inside the API process (single-node); false = use `python -m ... worker`
+  poll_seconds: 1.0
+  lease_seconds: 300
+  max_attempts: 3
+limits:
+  max_upload_bytes: 104857600     # absolute ceiling; the plan's max_run_mb applies below it
+  max_text_chars: 5000000
+  parse_timeout_seconds: 20
+  request_rate_per_minute: 240
+  login_rate_per_minute: 10
+security:
+  session_hours: 12
+  csrf: true
+  password_min_length: 12
+  mfa_issuer: AIDAP
+billing:
+  provider: sandbox               # sandbox | stripe
+  auto_overage: false
+slai:
+  enabled: true                   # use SLAI agents when importable; degrade to NOT_EVALUATED otherwise
+                                  # checkpoints live under <data_dir>/checkpoints

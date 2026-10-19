@@ -1,0 +1,19 @@
+id: api_feed
+name: API / data feed
+task: api_feed
+description: "Recurring record feeds. Freshness of records is judged by a date field, and the feed is compared with an approved baseline when one exists."
+audience: [systems]
+source_classes: [third_party, internal_doc, customer_upload]
+max_classification: internal
+destinations: [local_index, internal_model]
+freshness_days: 7
+privacy:
+  purpose: operational_feed
+  allowed_types: []
+required_checks: [intake.format, quality.structural, quality.statistical, temporal.freshness, privacy.pii, safety.injection]
+optional_checks: [quality.duplicates, quality.anomaly, quality.relationship, provenance.origin, slai.quality]
+thresholds:
+  date_field: updated_at
+  max_stale_ratio: 0.1
+  max_missing_ratio: 0.1
+  min_records: 1

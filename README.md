@@ -25,6 +25,31 @@ Quality            Privacy               Safety
 It is not merely detecting bad data, but making an auditable decision about whether data is fit to enter a particular AI workflow.
 
 
+# Quick start
+
+```bash
+cd SLAI/applications
+pip install -r AIDAP/requirements.txt            # on top of SLAI's own requirements
+python -m AIDAP check                            # self-test: database, SLAI agents, checkpointing, scanner, billing
+python -m AIDAP serve                            # http://127.0.0.1:8780  (web app + API)
+```
+
+Open the app, create an account (free **Developer** plan), pick an intended-use profile, drop a file in, and read the decision.
+Plans: Developer €0 · Starter €39 · Team €149 · Business €499 · Enterprise on request (all per month, excl. VAT).
+Business contact: info.remy3design@gmail.com.
+
+| Read | |
+|---|---|
+| `docs/DEPLOYMENT.md` | configuration, production checklist, operations, known limitations |
+| `docs/BILLING.md` | plans, metering rules, Stripe |
+| `docs/API.md`, `docs/contracts/` | HTTP reference and JSON contracts |
+| `docs/SECURITY.md` | security model |
+| `docs/OVERLAP.md` | what AIDAP reuses from SLAI (`src/functions`, `checkpointing/`) and why `src/tuning` is unused |
+| `sdk/README.md` | Python client and CI gate |
+| `frontend/` | React 19 + TypeScript web app (prebuilt in `frontend/dist`; rebuild with `npm run build`) |
+
+Tests: `cd SLAI/applications && python -m unittest AIDAP.tests.test_pipeline AIDAP.tests.test_api AIDAP.tests.test_sdk AIDAP.tests.test_engine`.
+
 # 4. Canonical dependency hierarchy
 
 AIDAP uses an explicit dependency hierarchy.

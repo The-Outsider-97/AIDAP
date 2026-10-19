@@ -1,0 +1,30 @@
+id: strict
+name: Strict
+description: For regulated or externally exposed use. Antivirus must have scanned, coverage must be complete, exceptions are short and admin-only.
+mode: enforce
+severity_effects:
+  critical: block
+  high: review
+  medium: review
+  low: review
+  info: pass
+unknown_mandatory_effect: review
+min_coverage: 1.0
+decision_valid_hours: 168
+model_assist: false
+external_inference: false
+require_baseline: false
+require_av_scan: true
+exceptions:
+  - id: freshness
+    codes: ["temporal.*"]
+    max_days: 7
+    role: admin
+  - id: quality
+    codes: ["quality.*", "semantic.*"]
+    max_days: 7
+    role: admin
+  - id: personal-data
+    codes: ["privacy.pii.*"]
+    max_days: 3
+    role: security

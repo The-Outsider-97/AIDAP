@@ -1,0 +1,16 @@
+id: agent_memory
+name: Agent memory / tool context
+task: agent_memory
+description: "Content an autonomous agent will read as trusted context. Embedded instructions, hidden text and exfiltration patterns are screened first; a model-assisted review is capped at REVIEW."
+audience: [agents]
+source_classes: [internal_doc, published, third_party, generated]
+max_classification: internal
+destinations: [internal_model, local_index]
+privacy:
+  purpose: agent_context
+  allowed_types: []
+required_checks: [intake.format, safety.injection, safety.file, privacy.pii]
+optional_checks: [quality.structural, semantic.conflicts, provenance.origin, slai.safety, slai.semantic, slai.privacy]
+thresholds:
+  min_text_chars: 1
+tags: [agent]
