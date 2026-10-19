@@ -41,6 +41,7 @@ With `AIDAP_INLINE_WORKERS=1` (default) jobs run inside the API process. For sep
 | `python -m AIDAP export-contracts --out docs/contracts` | Write the JSON contracts |
 
 ## Known limitations
+* PDF and DOCX are read by SLAI's Reader (needs `pypdf`, which SLAI already requires). Scanned PDFs are reported as unread (no OCR); Word headers, footers, footnotes and comments are not read; encrypted or damaged files are refused. On Windows the sandboxed reader has process separation and a timeout but not the POSIX memory/CPU limits.
 * Storage is SQLite (single node). The persistence port is isolated in `infra/persistence`; moving to PostgreSQL means a new adapter.
 * The built-in malware check recognises only the EICAR test file and never reports "clean".
 * Stripe integration is implemented against Stripe's REST API but has not been exercised against a live account in this repository.

@@ -13,7 +13,7 @@ from typing import Any
 
 __all__ = ["Plan", "DEFAULT_PLANS", "PLAN_ORDER", "F_API", "F_WEBHOOKS", "F_REVIEW_ROLES", "F_SCHEDULES",
            "F_OBJECT_STORE", "F_AUDIT_EXPORT", "F_CONFIG_RETENTION", "F_MODEL_ASSIST", "F_CUSTOM_POLICY",
-           "F_PRIORITY_SUPPORT", "F_SSO", "F_PRIVATE_DEPLOYMENT", "FEATURE_LABELS", "plan_from_dict"]
+           "F_PRIORITY_SUPPORT", "F_TEST_SUITES", "F_METRICS_EXPORT", "F_SSO", "F_PRIVATE_DEPLOYMENT", "FEATURE_LABELS", "plan_from_dict"]
 
 F_API = "api"
 F_WEBHOOKS = "webhooks"
@@ -25,6 +25,8 @@ F_CONFIG_RETENTION = "configurable_retention"
 F_MODEL_ASSIST = "model_assist"
 F_CUSTOM_POLICY = "custom_policy"
 F_PRIORITY_SUPPORT = "priority_support"
+F_TEST_SUITES = "test_suites"
+F_METRICS_EXPORT = "metrics_export"
 F_SSO = "sso"
 F_PRIVATE_DEPLOYMENT = "private_deployment"
 
@@ -39,6 +41,8 @@ FEATURE_LABELS = {
     F_MODEL_ASSIST: "Managed model-assisted checks",
     F_CUSTOM_POLICY: "Custom profiles and policies",
     F_PRIORITY_SUPPORT: "Priority business-hours support",
+    F_TEST_SUITES: "Policy test suites",
+    F_METRICS_EXPORT: "Metrics export (Prometheus)",
     F_SSO: "Supported SSO integration",
     F_PRIVATE_DEPLOYMENT: "Private deployment",
 }
@@ -82,8 +86,8 @@ class Plan:
 
 
 _BASE = frozenset({F_API})
-_STARTER = _BASE | {F_MODEL_ASSIST, F_CUSTOM_POLICY}
-_TEAM = _STARTER | {F_WEBHOOKS, F_REVIEW_ROLES, F_SCHEDULES, F_OBJECT_STORE}
+_STARTER = _BASE | {F_MODEL_ASSIST, F_CUSTOM_POLICY, F_TEST_SUITES}
+_TEAM = _STARTER | {F_WEBHOOKS, F_REVIEW_ROLES, F_SCHEDULES, F_OBJECT_STORE, F_METRICS_EXPORT}
 _BUSINESS = _TEAM | {F_AUDIT_EXPORT, F_CONFIG_RETENTION, F_PRIORITY_SUPPORT}
 _ENTERPRISE = _BUSINESS | {F_SSO, F_PRIVATE_DEPLOYMENT}
 
@@ -98,12 +102,12 @@ DEFAULT_PLANS: dict[str, Plan] = {p.id: p for p in (
     Plan("starter", "Starter", "One production ingestion path with a managed-inference allowance.", 3900,
          1000, 5 * GB, 300, 1, 30, 25 * MB, 3, _STARTER, "self-service",
          highlights=("1 project", "1,000 runs / month", "5 GB deterministic scans", "€3 managed-inference allowance",
-                     "30-day evidence retention", "Custom profiles and policies")),
+                     "30-day evidence retention", "Custom profiles and policies", "Policy test suites")),
     Plan("team", "Team", "Shared review workflow, schedules and webhooks.", 14900,
          10000, 50 * GB, 1500, 5, 90, 50 * MB, 15, _TEAM, "email",
          highlights=("5 projects", "10,000 runs / month", "50 GB deterministic scans",
                      "€15 managed-inference allowance", "90-day evidence retention",
-                     "Review roles, schedules and webhooks", "Object-store delivery")),
+                     "Review roles, schedules and webhooks", "Object-store delivery", "Metrics export")),
     Plan("business", "Business", "Longer retention, audit export and priority support.", 49900,
          50000, 250 * GB, 5000, 20, 365, 100 * MB, 60, _BUSINESS, "priority business hours",
          highlights=("20 projects", "50,000 runs / month", "250 GB deterministic scans",

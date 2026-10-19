@@ -126,3 +126,33 @@ Request-body contracts: `docs/contracts/requests.json`. Permission matrix: `docs
 | POST | `/schedules` | auth |
 | PATCH | `/schedules/{sid}` | auth |
 | DELETE | `/schedules/{sid}` | auth |
+| GET | `/insights` | auth |
+| GET | `/insights/metrics` | auth |
+| POST | `/runs/{run_id}/findings/{finding_id}/feedback` | auth |
+| GET | `/runs/{run_id}/feedback` | auth |
+| GET | `/assets` | auth |
+| GET | `/assets/{asset_id}` | auth |
+| GET | `/suites` | auth |
+| POST | `/suites` | auth |
+| GET | `/suites/{suite_id}` | auth |
+| DELETE | `/suites/{suite_id}` | auth |
+| POST | `/suites/{suite_id}/cases` | auth |
+| DELETE | `/suites/{suite_id}/cases/{case_id}` | auth |
+| POST | `/suites/{suite_id}/run` | auth |
+| POST | `/profiles/suggest` | auth |
+
+## Insights, suites and finding feedback
+
+* `GET /insights?days=30&project_id=` returns coverage, reliability, review and finding-quality measures with their definitions.
+  `GET /insights/metrics` returns the same as Prometheus text (Team plan and above; `text/plain`).
+* `POST /runs/{run_id}/findings/{finding_id}/feedback` records `useful`, `false_positive` or `unclear` (one rating per person per
+  finding). Ratings feed Insights only; they never change a decision, a policy or a threshold.
+* `/suites` (Starter plan and above) holds adjudicated examples. `POST /suites/{id}/run` takes `profile_id` and optional `policy_id`
+  (or inline `profile` / `policy` documents) and returns per-example results with `looser` / `stricter` direction. Suite runs use
+  deterministic checks only.
+* `POST /profiles|policies/{id}/versions/{n}/publish` accepts `{"suite_ids": [...], "profile_id": "..."}`; a failing example stops
+  the publication with `409 suite_failed`.
+* `POST /profiles/suggest` drafts a profile from a sample (nothing is stored).
+* `GET /assets` and `GET /assets/{id}` give per-asset version history, with the reasons that appeared or cleared between runs.
+* Run metadata accepts `upstream_checks`, `great_expectations_result` and `soda_scan`; they are normalised into the
+  `provenance.upstream` check.

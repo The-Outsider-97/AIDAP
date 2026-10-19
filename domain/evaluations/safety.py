@@ -19,6 +19,10 @@ PROVENANCE_CHECKS: tuple[CheckSpec, ...] = (
     CheckSpec("provenance.origin", Category.PROVENANCE, 11, "Origin and ownership", "D",
               "Source identity, owner and revision metadata. Asserted origin is not verified origin.",
               FailureClass.PROVENANCE),
+    CheckSpec("provenance.upstream", Category.PROVENANCE, 11, "Upstream monitoring signals", "D",
+              "Results that data-quality and observability tools reported about the input (Great Expectations, Soda, "
+              "Monte Carlo and similar). Asserted by the submitter: a failure adds a finding, a pass proves nothing.",
+              FailureClass.PROVENANCE),
 )
 
 SLAI_CHECKS: tuple[CheckSpec, ...] = (

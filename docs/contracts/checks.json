@@ -34,6 +34,13 @@
     "stage": 11,
     "title": "Origin and ownership"
   },
+  "provenance.upstream": {
+    "category": "provenance",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 11,
+    "title": "Upstream monitoring signals"
+  },
   "quality.anomaly": {
     "category": "quality",
     "default_mandatory": false,

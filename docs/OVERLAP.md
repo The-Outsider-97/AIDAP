@@ -60,6 +60,63 @@ later run on AIDAP's confidence scores, they would call `src/tuning` from outsid
 | Safety | `SafetyAgent` (needs torch) | `slai.safety` is `not_evaluated` |
 | Provenance | `ProvenanceAgent` | `slai.provenance` is `not_evaluated` |
 | Language / semantic | `LanguageAgent` (needs torch) | `slai.semantic` is `not_evaluated` |
+| PDF and Word reading | `ReaderAgent` subsystem: `DetectionEngine`, `IntegrityEngine` (+ `ExpansionGuard`), `ParserEngine` | PDF and DOCX are reported as unsupported, as before |
 
 Agent output is mapped to AIDAP findings in `slai/result_mapper.py`: severity capped at HIGH, origin recorded as `slai`, and
 context-free detections (for example a bare date flagged as a date of birth) are ignored rather than escalated.
+
+### How the Reader is used (`slai/reader_intake.py`, `slai/_reader_worker.py`)
+
+AIDAP's own parsers read text, Markdown, HTML, JSON, JSON Lines, CSV and TSV. PDF and Word are the formats RAG corpora mostly consist of,
+and SLAI already has the pieces to read them safely, so AIDAP calls those instead of writing a second PDF/DOCX reader:
+
+* `DetectionEngine` — identity from content, not from the file name (a PDF named `.docx` is flagged); encrypted and damaged containers.
+* `IntegrityEngine` — ZIP structure and expansion limits (decompression bombs), required package members, CRCs, PDF trailer and page tree.
+* `ParserEngine` — text extraction (`pypdf`, Word XML).
+
+It runs in a **separate sandboxed process** (CPU, memory, file-size and process limits on POSIX; wall-clock timeout everywhere), reads the
+file from a private directory that is removed afterwards, and its output is a plain JSON document. Two deliberate deviations from "just
+call the agent":
+
+1. `ReaderMemory` (Reader's disk cache of parsed content) is **not used** and SLAI's logger is replaced by a silent one in that process.
+   Both would put customer content outside AIDAP's retention, deletion and tenant boundaries.
+2. Reader's `salvage`, `recovery`, `conversion` and `compression` engines are **not used**. AIDAP validates the file the customer sent;
+   it never repairs, rewrites or recompresses it, because the released artifact must be byte-identical to what was assessed.
+
+What AIDAP adds because Reader has no equivalent: scripts, launch actions and attachments in PDFs; macros, embedded objects and remote
+templates in Word files; Word text formatted as hidden; refusal of XML with DTD/entity declarations; document properties (title, author,
+dates) as provenance hints. Limits that remain: scanned PDFs have no text layer and are reported as *not read* (no OCR); Word headers,
+footers, footnotes and comments are not read; hidden text in PDFs (for example white-on-white) cannot be detected from extracted text.
+
+## SLAI agents reviewed and *not* integrated
+
+Added only where it fixes a gap that was verified in AIDAP. Read in some depth: Reader, Alignment, Knowledge, Observability,
+Verification, Evaluation (and the whitepaper's own assessment of Evaluation, Reasoning, Execution, Adaptive/Learning). The remainder
+were judged from their purpose and the whitepaper's Table 4, not read line by line.
+
+| Agent | Decision | Reason |
+|---|---|---|
+| Alignment (bias/fairness) | Not now | Needs the customer to declare protected attributes and an outcome column, which no AIDAP profile carries; fairness conclusions are a legal/organisational judgement (whitepaper: out of the product's remit). A candidate `training_batch` check if customers ask; it needs a profile-schema change first. |
+| Knowledge | No | Retrieval, ontology and governance for SLAI's own knowledge. AIDAP's conflict, supersession and freshness checks are native and deterministic. |
+| Observability | No | Analyses SLAI's multi-agent runtime telemetry. AIDAP's operational data comes from its own stage and job ledgers; there is nothing to feed it. |
+| Verification | No | Formal model checking over explicit formal models; not a data validator. |
+| Evaluation | No | Whitepaper: code/system evaluation, not a trained general AI-input anomaly service. |
+| Reasoning | Later | Whitepaper: optional later use for explicit domain rules; AIDAP policies already express those. |
+| Execution, Adaptive, Learning | No | Whitepaper: unused in a read-only gate; no live policy changes. |
+| Handler | No | Fallback/retry policy at execution time. AIDAP's queue already retries and dead-letters, and metering must stay idempotent. |
+| Orchestrator, Planning, Collaborative | No | AIDAP runs a fixed 20-stage plan on purpose (whitepaper: no autonomous negotiation for routine checks). |
+| Perception | No | Images/audio; OCR is out of the initial scope. Scanned PDFs are reported as unread instead of guessed. |
+| Browser, Network, QNN, Spatial, STEM, Simulation, Optimization | No | No data-assurance function for AIDAP's inputs. |
+
+## Operating measures, test suites and near-duplicate detection — native by design
+
+| Capability | Where | Reuse decision |
+|---|---|---|
+| Insights, review SLA, Prometheus export | `app/services/insights.py` | Native. Computed from AIDAP's own run, review, delivery and feedback ledgers. SLAI's Observability agent analyses SLAI runtime telemetry, which AIDAP does not produce, so it is still not used. |
+| Test suites and publish gate | `app/services/suites.py` | Reuses AIDAP's `SimulationService`; no second evaluator. Suites run deterministic checks only, so results are repeatable. |
+| Near-duplicates and outliers | `assurance_engine/evaluators/quality/similarity.py`, `population.py` | Native and deterministic (shingle Jaccard with a bounded sketch index; robust z-score). `slai.quality` stays an optional heuristic add-on and its findings are capped at Review. |
+| Upstream monitoring signals | `assurance_engine/ingestion/signals.py`, `provenance.upstream` | Consumes Great Expectations, Soda and generic results as asserted by the submitter. AIDAP does not run warehouse monitoring. |
+| Profile suggestion | `SuggestionService` | Uses `detect_all` and the existing profile schema and lint; nothing is stored until the user saves a draft. |
+| Webhook relay example | `sdk/examples/slack_relay.py` | Uses the existing signed envelope from `src/functions`; no new delivery path. |
+
+Not duplicated: `checkpointing/` (stage restart), `src/tuning/` (unused), `src/functions` (signing, rate limiting, webhooks).

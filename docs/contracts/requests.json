@@ -247,6 +247,23 @@
       "type": "url"
     }
   },
+  "FINDING_FEEDBACK": {
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "useful",
+        "false_positive",
+        "unclear"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
   "INVITE_ACCEPT": {
     "name": {
       "maxLength": 120,
@@ -448,6 +465,27 @@
       "maxLength": 100,
       "required": false,
       "type": "string"
+    }
+  },
+  "PUBLISH_GATE": {
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "suite_ids": {
+      "items": {
+        "maxLength": 80,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
     }
   },
   "QUARANTINE_ACCESS": {
@@ -927,6 +965,147 @@
       "type": "string"
     }
   },
+  "SUGGEST_FIELDS": {
+    "content": {
+      "maxLength": 5000000,
+      "required": false,
+      "type": "string"
+    },
+    "filename": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": false,
+      "type": "string"
+    },
+    "task": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "SUITE_CASE": {
+    "classification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "content": {
+      "maxLength": 200000,
+      "required": false,
+      "type": "string"
+    },
+    "destination": {
+      "enum": [
+        "local_index",
+        "internal_model",
+        "training_set",
+        "external_model",
+        "public_endpoint"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "expected": {
+      "enum": [
+        "pass",
+        "review",
+        "quarantine",
+        "block"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "expected_codes": {
+      "items": {
+        "maxLength": 120,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
+    },
+    "filename": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "metadata": {
+      "required": false,
+      "type": "free"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": false,
+      "type": "string"
+    },
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    },
+    "source_class": {
+      "enum": [
+        "published",
+        "internal_doc",
+        "customer_upload",
+        "third_party",
+        "generated",
+        "unknown"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "SUITE_CREATE": {
+    "description": {
+      "maxLength": 500,
+      "required": false,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": true,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "SUITE_RUN": {
+    "policy": {
+      "required": false,
+      "type": "free"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile": {
+      "required": false,
+      "type": "free"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    }
+  },
   "TENANT_UPDATE": {
     "name": {
       "maxLength": 120,
@@ -935,6 +1114,12 @@
     },
     "retention_days": {
       "maximum": 3650,
+      "minimum": 1,
+      "required": false,
+      "type": "integer"
+    },
+    "review_sla_hours": {
+      "maximum": 720,
       "minimum": 1,
       "required": false,
       "type": "integer"

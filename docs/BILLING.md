@@ -11,8 +11,8 @@ override any value in `configs/plans.yaml` without a code change.
 | Business | €499 | 50,000 | 250 GB | €50 | 20 | 60 | 365 days | 100 MB |
 | Enterprise | quoted (€12–30k / yr + €3–8k onboarding) | custom | custom | custom | custom | custom | custom | custom |
 
-Features: the API is in every plan. **Starter** adds model-assisted review and custom profiles/policies. **Team** adds signed
-webhooks, review roles, schedules and object-store delivery. **Business** adds audit export, configurable retention and priority
+Features: the API is in every plan. **Starter** adds model-assisted review, custom profiles/policies and policy test suites. **Team** adds signed
+webhooks, review roles, schedules, object-store delivery and Prometheus metrics export. **Business** adds audit export, configurable retention and priority
 support. **Enterprise** adds SSO and private deployment.
 
 ## Rules
