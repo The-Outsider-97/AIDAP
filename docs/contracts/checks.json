@@ -1,0 +1,156 @@
+{
+  "fitness.intended_use": {
+    "category": "fitness",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 12,
+    "title": "Intended-use fitness"
+  },
+  "intake.format": {
+    "category": "intake",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 3,
+    "title": "Format and parse coverage"
+  },
+  "privacy.destination": {
+    "category": "privacy",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 9,
+    "title": "Destination permissions"
+  },
+  "privacy.pii": {
+    "category": "privacy",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 9,
+    "title": "Personal data and secrets"
+  },
+  "provenance.origin": {
+    "category": "provenance",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 11,
+    "title": "Origin and ownership"
+  },
+  "quality.anomaly": {
+    "category": "quality",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 6,
+    "title": "Distribution comparison"
+  },
+  "quality.duplicates": {
+    "category": "quality",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 5,
+    "title": "Duplicates"
+  },
+  "quality.metadata": {
+    "category": "quality",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 4,
+    "title": "Required metadata"
+  },
+  "quality.relationship": {
+    "category": "quality",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 7,
+    "title": "Cross-field relationships"
+  },
+  "quality.statistical": {
+    "category": "quality",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 5,
+    "title": "Missingness and sample coverage"
+  },
+  "quality.structural": {
+    "category": "quality",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 4,
+    "title": "Structural integrity"
+  },
+  "safety.file": {
+    "category": "safety",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 10,
+    "title": "File safety"
+  },
+  "safety.injection": {
+    "category": "safety",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 10,
+    "title": "Embedded instructions"
+  },
+  "semantic.conflicts": {
+    "category": "semantic",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 8,
+    "title": "Conflicting statements"
+  },
+  "semantic.rules": {
+    "category": "semantic",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 8,
+    "title": "Configured semantic rules"
+  },
+  "slai.privacy": {
+    "category": "privacy",
+    "default_mandatory": false,
+    "origin": "slai",
+    "stage": 9,
+    "title": "SLAI Privacy Agent"
+  },
+  "slai.provenance": {
+    "category": "provenance",
+    "default_mandatory": false,
+    "origin": "slai",
+    "stage": 11,
+    "title": "SLAI provenance"
+  },
+  "slai.quality": {
+    "category": "quality",
+    "default_mandatory": false,
+    "origin": "slai",
+    "stage": 4,
+    "title": "SLAI Quality Agent"
+  },
+  "slai.safety": {
+    "category": "safety",
+    "default_mandatory": false,
+    "origin": "slai",
+    "stage": 10,
+    "title": "SLAI Safety Agent"
+  },
+  "slai.semantic": {
+    "category": "semantic",
+    "default_mandatory": false,
+    "origin": "model",
+    "stage": 8,
+    "title": "SLAI semantic reasoning"
+  },
+  "temporal.freshness": {
+    "category": "temporal",
+    "default_mandatory": true,
+    "origin": "native",
+    "stage": 8,
+    "title": "Freshness window"
+  },
+  "temporal.supersession": {
+    "category": "temporal",
+    "default_mandatory": false,
+    "origin": "native",
+    "stage": 8,
+    "title": "Superseded content"
+  }
+}

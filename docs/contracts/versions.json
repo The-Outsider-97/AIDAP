@@ -1,0 +1,9 @@
+{
+  "decision": "aidap.decision/1",
+  "error": "aidap.error/1",
+  "evidence": "aidap.evidence/1",
+  "report": "aidap.report/1",
+  "slai_request": "aidap.slai.request/1",
+  "slai_response": "aidap.slai.response/1",
+  "webhook": "aidap.webhook/1"
+}

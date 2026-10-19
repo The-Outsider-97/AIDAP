@@ -1,0 +1,82 @@
+[
+  {
+    "guidance": "Remove the credential, rotate it, and resubmit. Credentials are never released.",
+    "prefix": "privacy.secret"
+  },
+  {
+    "guidance": "Redact the listed values or choose a destination whose profile permits them, then resubmit.",
+    "prefix": "privacy.destination"
+  },
+  {
+    "guidance": "Create a redacted version from the findings page; it is re-validated as a new input.",
+    "prefix": "privacy.pii"
+  },
+  {
+    "guidance": "Keep the artifact quarantined and investigate the source. This cannot be waived.",
+    "prefix": "safety.malicious"
+  },
+  {
+    "guidance": "Do not open or index this file. Obtain a clean copy from the original owner.",
+    "prefix": "safety.file"
+  },
+  {
+    "guidance": "Remove the embedded instructions and resubmit, or have a security reviewer assess them.",
+    "prefix": "safety.injection"
+  },
+  {
+    "guidance": "Provide the current version or an approved extension of the validity period.",
+    "prefix": "temporal.expired"
+  },
+  {
+    "guidance": "Submit the replacing revision instead of this one.",
+    "prefix": "temporal.superseded"
+  },
+  {
+    "guidance": "Fix the listed fields and resubmit; the findings cite exact locations.",
+    "prefix": "quality.structural"
+  },
+  {
+    "guidance": "Add the required metadata (owner, revision, effective date) and resubmit.",
+    "prefix": "quality.metadata"
+  },
+  {
+    "guidance": "Remove duplicate records or confirm they are intended.",
+    "prefix": "quality.duplicates"
+  },
+  {
+    "guidance": "Review missingness and sample size against the profile thresholds.",
+    "prefix": "quality.statistical"
+  },
+  {
+    "guidance": "Confirm the change is intended and, if so, propose and approve a new baseline.",
+    "prefix": "quality.anomaly"
+  },
+  {
+    "guidance": "Resolve the conflicting statements; both cited spans must agree.",
+    "prefix": "semantic.conflicts"
+  },
+  {
+    "guidance": "Adjust the content or the profile rule that fired.",
+    "prefix": "semantic.rules"
+  },
+  {
+    "guidance": "Choose a profile that matches this source, audience and destination.",
+    "prefix": "fitness."
+  },
+  {
+    "guidance": "A mandatory check could not complete. Retry, or have a reviewer decide with the coverage shown.",
+    "prefix": "incomplete."
+  },
+  {
+    "guidance": "The policy prohibits this use; change the destination or the policy through its approval workflow.",
+    "prefix": "policy."
+  },
+  {
+    "guidance": "The file could not be read as a supported format. Convert it and resubmit.",
+    "prefix": "intake."
+  },
+  {
+    "guidance": "Model-assisted finding: a reviewer must confirm it. It cannot block on its own.",
+    "prefix": "slai."
+  }
+]

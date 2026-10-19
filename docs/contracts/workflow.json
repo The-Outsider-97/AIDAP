@@ -1,0 +1,122 @@
+[
+  {
+    "key": "ingestion",
+    "method": "D",
+    "stage": 1,
+    "title": "Ingestion"
+  },
+  {
+    "key": "normalization",
+    "method": "D",
+    "stage": 2,
+    "title": "Normalization"
+  },
+  {
+    "key": "format_validation",
+    "method": "D",
+    "stage": 3,
+    "title": "Format/schema validation"
+  },
+  {
+    "key": "structural_quality",
+    "method": "D",
+    "stage": 4,
+    "title": "Structural quality"
+  },
+  {
+    "key": "statistical_quality",
+    "method": "D/S",
+    "stage": 5,
+    "title": "Statistical quality"
+  },
+  {
+    "key": "anomaly_detection",
+    "method": "S",
+    "stage": 6,
+    "title": "Anomaly detection"
+  },
+  {
+    "key": "relationship_analysis",
+    "method": "D",
+    "stage": 7,
+    "title": "Relationship analysis"
+  },
+  {
+    "key": "semantic_fitness",
+    "method": "D/M",
+    "stage": 8,
+    "title": "Semantic fitness"
+  },
+  {
+    "key": "privacy_screening",
+    "method": "D/M",
+    "stage": 9,
+    "title": "Privacy screening"
+  },
+  {
+    "key": "safety_screening",
+    "method": "D/M",
+    "stage": 10,
+    "title": "Safety screening"
+  },
+  {
+    "key": "provenance_evidence",
+    "method": "D",
+    "stage": 11,
+    "title": "Provenance/evidence"
+  },
+  {
+    "key": "intended_use_fitness",
+    "method": "D/M",
+    "stage": 12,
+    "title": "Intended-use fitness"
+  },
+  {
+    "key": "confidence",
+    "method": "S/M",
+    "stage": 13,
+    "title": "Confidence"
+  },
+  {
+    "key": "policy_decision",
+    "method": "D",
+    "stage": 14,
+    "title": "Policy decision"
+  },
+  {
+    "key": "disposition",
+    "method": "D/H",
+    "stage": 15,
+    "title": "Disposition"
+  },
+  {
+    "key": "evidence_generation",
+    "method": "D",
+    "stage": 16,
+    "title": "Evidence generation"
+  },
+  {
+    "key": "audit_logging",
+    "method": "D",
+    "stage": 17,
+    "title": "Audit logging"
+  },
+  {
+    "key": "checkpointing",
+    "method": "D",
+    "stage": 18,
+    "title": "Checkpointing"
+  },
+  {
+    "key": "alerting",
+    "method": "D",
+    "stage": 19,
+    "title": "Alerting"
+  },
+  {
+    "key": "delivery",
+    "method": "D",
+    "stage": 20,
+    "title": "Delivery"
+  }
+]

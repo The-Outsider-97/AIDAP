@@ -1,0 +1,951 @@
+{
+  "ALERT_ACK": {
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "API_KEY_CREATE": {
+    "expires_in_days": {
+      "maximum": 730,
+      "minimum": 1,
+      "required": false,
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "project_ids": {
+      "items": {
+        "maxLength": 80,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
+    },
+    "scopes": {
+      "items": {
+        "enum": [
+          "runs:write",
+          "runs:read",
+          "deliveries:read",
+          "policies:read",
+          "usage:read"
+        ],
+        "maxLength": 80,
+        "required": false,
+        "type": "string"
+      },
+      "required": true,
+      "type": "list"
+    }
+  },
+  "BASELINE_PROPOSE": {
+    "name": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "BILLING_SETTINGS": {
+    "auto_overage": {
+      "required": false,
+      "type": "boolean"
+    },
+    "hold_on_exhaustion": {
+      "required": false,
+      "type": "boolean"
+    }
+  },
+  "CHECKOUT": {
+    "plan_id": {
+      "enum": [
+        "developer",
+        "starter",
+        "team",
+        "business"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "CONFIG_CREATE": {
+    "document": {
+      "required": true,
+      "type": "free"
+    },
+    "id": {
+      "maxLength": 64,
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 120,
+      "required": true,
+      "type": "string"
+    },
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "CONFIG_VERSION": {
+    "document": {
+      "required": true,
+      "type": "free"
+    },
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "CONTACT": {
+    "company": {
+      "maxLength": 160,
+      "required": false,
+      "type": "string"
+    },
+    "email": {
+      "maxLength": 254,
+      "required": true,
+      "type": "email"
+    },
+    "message": {
+      "maxLength": 4000,
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 120,
+      "required": true,
+      "type": "string"
+    },
+    "topic": {
+      "enum": [
+        "enterprise",
+        "sales",
+        "support",
+        "security",
+        "other"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "website": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "DESTINATION_CREATE": {
+    "delivery": {
+      "enum": [
+        "pull",
+        "webhook",
+        "object_store"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    },
+    "klass": {
+      "enum": [
+        "local_index",
+        "internal_model",
+        "training_set",
+        "external_model",
+        "public_endpoint"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": true,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "secret": {
+      "maxLength": 256,
+      "required": false,
+      "type": "string"
+    },
+    "target_url": {
+      "maxLength": 2000,
+      "required": false,
+      "type": "url"
+    }
+  },
+  "DESTINATION_UPDATE": {
+    "delivery": {
+      "enum": [
+        "pull",
+        "webhook",
+        "object_store"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    },
+    "enabled": {
+      "required": false,
+      "type": "boolean"
+    },
+    "klass": {
+      "enum": [
+        "local_index",
+        "internal_model",
+        "training_set",
+        "external_model",
+        "public_endpoint"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": false,
+      "type": "string"
+    },
+    "secret": {
+      "maxLength": 256,
+      "required": false,
+      "type": "string"
+    },
+    "target_url": {
+      "maxLength": 2000,
+      "required": false,
+      "type": "url"
+    }
+  },
+  "INVITE_ACCEPT": {
+    "name": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "password": {
+      "maxLength": 256,
+      "required": false,
+      "type": "string"
+    },
+    "token": {
+      "maxLength": 200,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "INVITE_CREATE": {
+    "email": {
+      "maxLength": 254,
+      "required": true,
+      "type": "email"
+    },
+    "project_ids": {
+      "items": {
+        "maxLength": 80,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
+    },
+    "role": {
+      "enum": [
+        "admin",
+        "security",
+        "reviewer",
+        "analyst",
+        "viewer"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "LINT": {
+    "policy": {
+      "required": false,
+      "type": "free"
+    },
+    "profile": {
+      "required": false,
+      "type": "free"
+    }
+  },
+  "LOGIN": {
+    "code": {
+      "maxLength": 20,
+      "required": false,
+      "type": "string"
+    },
+    "email": {
+      "maxLength": 254,
+      "required": true,
+      "type": "email"
+    },
+    "password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "MEMBER_UPDATE": {
+    "project_ids": {
+      "items": {
+        "maxLength": 80,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
+    },
+    "role": {
+      "enum": [
+        "admin",
+        "security",
+        "reviewer",
+        "analyst",
+        "viewer"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "MFA_CODE": {
+    "code": {
+      "maxLength": 20,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "MFA_DISABLE": {
+    "code": {
+      "maxLength": 20,
+      "required": true,
+      "type": "string"
+    },
+    "password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "PASSWORD_CHANGE": {
+    "current_password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    },
+    "new_password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "PASSWORD_RESET_CONFIRM": {
+    "new_password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    },
+    "token": {
+      "maxLength": 200,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "PASSWORD_RESET_REQUEST": {
+    "email": {
+      "maxLength": 254,
+      "required": true,
+      "type": "email"
+    }
+  },
+  "PROJECT_CREATE": {
+    "default_destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "default_policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "default_profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 500,
+      "required": false,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "PROJECT_UPDATE": {
+    "archived": {
+      "required": false,
+      "type": "boolean"
+    },
+    "default_destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "default_policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "default_profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 500,
+      "required": false,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "QUARANTINE_ACCESS": {
+    "purpose": {
+      "maxLength": 500,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "QUARANTINE_DISPOSE": {
+    "action": {
+      "enum": [
+        "delete",
+        "release_for_investigation"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "comment": {
+      "maxLength": 500,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "REDACT": {
+    "note": {
+      "maxLength": 300,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "REVIEW_ASSIGN": {
+    "assignee": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "REVIEW_RESOLVE": {
+    "comment": {
+      "maxLength": 2000,
+      "required": false,
+      "type": "string"
+    },
+    "days": {
+      "maximum": 365,
+      "minimum": 1,
+      "required": false,
+      "type": "integer"
+    },
+    "reason_codes": {
+      "items": {
+        "maxLength": 120,
+        "required": false,
+        "type": "string"
+      },
+      "required": false,
+      "type": "list"
+    },
+    "resolution": {
+      "enum": [
+        "approve_exception",
+        "reject",
+        "request_repair"
+      ],
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "RUN_FIELDS_MULTIPART": {
+    "asset_name": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "metadata": {
+      "required": false,
+      "type": "free"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "source_class": {
+      "enum": [
+        "published",
+        "internal_doc",
+        "customer_upload",
+        "third_party",
+        "generated",
+        "unknown"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "wait": {
+      "required": false,
+      "type": "boolean"
+    }
+  },
+  "RUN_JSON": {
+    "asset_name": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "content": {
+      "maxLength": 5000000,
+      "required": false,
+      "type": "string"
+    },
+    "destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "filename": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "media_type": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "metadata": {
+      "required": false,
+      "type": "free"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "source_class": {
+      "enum": [
+        "published",
+        "internal_doc",
+        "customer_upload",
+        "third_party",
+        "generated",
+        "unknown"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "wait": {
+      "required": false,
+      "type": "boolean"
+    }
+  },
+  "RUN_SUBMIT": {
+    "asset_name": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "content": {
+      "maxLength": 5000000,
+      "required": false,
+      "type": "string"
+    },
+    "destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "filename": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "media_type": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "metadata": {
+      "required": false,
+      "type": "free"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "source_class": {
+      "enum": [
+        "published",
+        "internal_doc",
+        "customer_upload",
+        "third_party",
+        "generated",
+        "unknown"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "wait": {
+      "required": false,
+      "type": "boolean"
+    }
+  },
+  "SCHEDULE_CREATE": {
+    "destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "interval_minutes": {
+      "maximum": 10080,
+      "minimum": 15,
+      "required": true,
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": true,
+      "type": "string"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 80,
+      "required": true,
+      "type": "string"
+    },
+    "source_url": {
+      "maxLength": 2000,
+      "required": true,
+      "type": "url"
+    }
+  },
+  "SCHEDULE_UPDATE": {
+    "destination_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "enabled": {
+      "required": false,
+      "type": "boolean"
+    },
+    "interval_minutes": {
+      "maximum": 10080,
+      "minimum": 15,
+      "required": false,
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 100,
+      "required": false,
+      "type": "string"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "source_url": {
+      "maxLength": 2000,
+      "required": false,
+      "type": "url"
+    }
+  },
+  "SIGNUP": {
+    "accept_terms": {
+      "required": true,
+      "type": "boolean"
+    },
+    "email": {
+      "maxLength": 254,
+      "required": true,
+      "type": "email"
+    },
+    "name": {
+      "maxLength": 120,
+      "required": true,
+      "type": "string"
+    },
+    "organization": {
+      "maxLength": 120,
+      "required": true,
+      "type": "string"
+    },
+    "password": {
+      "maxLength": 256,
+      "required": true,
+      "type": "string"
+    }
+  },
+  "SIMULATE_FIELDS": {
+    "classification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "content": {
+      "maxLength": 5000000,
+      "required": false,
+      "type": "string"
+    },
+    "destination": {
+      "enum": [
+        "local_index",
+        "internal_model",
+        "training_set",
+        "external_model",
+        "public_endpoint"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "filename": {
+      "maxLength": 200,
+      "required": false,
+      "type": "string"
+    },
+    "metadata": {
+      "required": false,
+      "type": "free"
+    },
+    "policy": {
+      "required": false,
+      "type": "free"
+    },
+    "policy_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "profile": {
+      "required": false,
+      "type": "free"
+    },
+    "profile_id": {
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    },
+    "source_class": {
+      "enum": [
+        "published",
+        "internal_doc",
+        "customer_upload",
+        "third_party",
+        "generated",
+        "unknown"
+      ],
+      "maxLength": 80,
+      "required": false,
+      "type": "string"
+    }
+  },
+  "TENANT_UPDATE": {
+    "name": {
+      "maxLength": 120,
+      "required": false,
+      "type": "string"
+    },
+    "retention_days": {
+      "maximum": 3650,
+      "minimum": 1,
+      "required": false,
+      "type": "integer"
+    }
+  },
+  "TOPUP": {
+    "amount_cents": {
+      "maximum": 100000,
+      "minimum": 500,
+      "required": true,
+      "type": "integer"
+    }
+  }
+}
