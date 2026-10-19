@@ -38,7 +38,10 @@ def _load(name: str) -> ModuleType:
     try:
         return importlib.import_module(name)
     except Exception as exc:                                   # noqa: BLE001 - re-raised with context
-        raise Unavailable(f"SLAI module '{name}' could not be imported ({type(exc).__name__}: {exc}). "
+        hint = ""
+        if isinstance(exc, ModuleNotFoundError) and exc.name and not exc.name.startswith(("src", "logs", "checkpointing")):
+            hint = f" Install it with: pip install {exc.name.split('.')[0]}"
+        raise Unavailable(f"SLAI module '{name}' could not be imported ({type(exc).__name__}: {exc}).{hint} "
                           f"AIDAP must run inside the SLAI repository with SLAI's requirements installed.",
                           code="slai_unavailable") from exc
 

@@ -1,14 +1,18 @@
-# Block a pipeline when a knowledge-base export is not fit for RAG indexing.
-name: validate-knowledge-base
-on: [push]
+# Block a pull request when a knowledge-base export is not fit for RAG indexing, and when a policy change
+# would make a golden example behave differently from how it was adjudicated.
+name: aidap
+on: [pull_request]
 jobs:
-  aidap:
+  gate:
     runs-on: ubuntu-latest
+    env:
+      AIDAP_URL: https://aidap.example.com
+      AIDAP_API_KEY: ${{ secrets.AIDAP_API_KEY }}     # scopes: runs:write, policies:read
+      AIDAP_PROJECT: prj_xxx
     steps:
       - uses: actions/checkout@v4
-      - run: pip install ./sdk            # or vendor aidap_sdk
-      - run: python -m aidap_sdk check export/handbook.json --project "$AIDAP_PROJECT" --profile rag_indexing
-        env:
-          AIDAP_URL: https://aidap.example.com
-          AIDAP_API_KEY: ${{ secrets.AIDAP_API_KEY }}
-          AIDAP_PROJECT: prj_xxx
+      - run: pip install ./sdk                        # or vendor aidap_sdk
+      - name: Check the export
+        run: python -m aidap_sdk check export/handbook.json --project "$AIDAP_PROJECT" --profile rag_indexing --github
+      - name: Run the golden-set suite
+        run: python -m aidap_sdk suite sui_xxx --profile rag_indexing --policy standard

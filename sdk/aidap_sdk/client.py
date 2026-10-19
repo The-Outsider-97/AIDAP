@@ -168,5 +168,45 @@ class Client:
     def usage(self) -> dict[str, Any]:
         return self._call("GET", "/usage")
 
+    # ------------------------------------------------------------------ insights, feedback and test suites
+    def insights(self, days: int = 30, project: str = "") -> dict[str, Any]:
+        return self._call("GET", "/insights", query={"days": days, "project_id": project})
+
+    def metrics(self, days: int = 30) -> str:
+        """Prometheus text exposition of the workspace's operating metrics (Team plan and above)."""
+        return self._call("GET", "/insights/metrics", query={"days": days}, want_bytes=True).decode("utf-8")
+
+    def rate_finding(self, run_id: str, finding_id: str, verdict: str, note: str = "") -> dict[str, Any]:
+        """verdict: useful | false_positive | unclear. Feedback informs policy owners; it never changes a decision."""
+        return self._call("POST", f"/runs/{run_id}/findings/{finding_id}/feedback", body={"verdict": verdict, "note": note})
+
+    def suites(self) -> list[dict[str, Any]]:
+        return self._call("GET", "/suites")
+
+    def run_suite(self, suite_id: str, *, profile: str = "", policy: str = "", profile_document: dict | None = None,
+                  policy_document: dict | None = None) -> dict[str, Any]:
+        """Evaluate a golden-set suite with deterministic checks. Nothing is stored as a run and no quota is used."""
+        body: dict[str, Any] = {}
+        if profile:
+            body["profile_id"] = profile
+        if policy:
+            body["policy_id"] = policy
+        if profile_document:
+            body["profile"] = profile_document
+        if policy_document:
+            body["policy"] = policy_document
+        return self._call("POST", f"/suites/{suite_id}/run", body=body)
+
+    def suggest_profile(self, data: bytes | str | os.PathLike[str], *, filename: str = "", name: str = "") -> dict[str, Any]:
+        """Draft an intended-use profile from a representative sample. Nothing is stored."""
+        if isinstance(data, (str, os.PathLike)) and os.path.exists(str(data)):
+            filename = filename or os.path.basename(str(data))
+            with open(str(data), "rb") as fh:
+                payload = fh.read()
+        else:
+            payload = data.encode("utf-8") if isinstance(data, str) else bytes(data)
+        return self._call("POST", "/profiles/suggest", raw=payload, query={"name": name},
+                          headers={"Content-Type": "application/octet-stream", "X-Filename": filename or "sample.csv"})
+
     def projects(self) -> list[dict[str, Any]]:
         return self._call("GET", "/projects")

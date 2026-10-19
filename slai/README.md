@@ -17,6 +17,7 @@ AIDAP lives in `applications/AIDAP` and uses SLAI as its runtime. This package i
 | Safety screening | `src.agents.safety_agent.SafetyAgent` | `slai/evaluators.py` |
 | Lineage | `src.agents.provenance_agent.ProvenanceAgent` | `slai/evaluators.py`, `orchestration.py` |
 | Model-assisted semantic review | `src.agents.language_agent.LanguageAgent` | `slai/reasoning_gateway.py` |
+| PDF and DOCX reading, file identity and integrity | `src.agents.reader` (`DetectionEngine`, `IntegrityEngine`, `ParserEngine`) in a sandboxed process | `slai/reader_intake.py`, `slai/_reader_worker.py` |
 
 `src/tuning` is intentionally **not** used: AIDAP trains and tunes nothing. See `docs/OVERLAP.md`.
 

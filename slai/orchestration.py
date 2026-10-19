@@ -11,6 +11,7 @@ from .checkpoint_store import DocStageCheckpoints, SlaiStageCheckpoints
 from .evaluators import build_slai_evaluators
 from .governance import AgentGovernor
 from .health import slai_health
+from .reader_intake import ReaderIntake
 from .reasoning_gateway import SlaiLanguageReasoner
 from .runtime import slai_present
 
@@ -21,6 +22,7 @@ class SlaiRuntime:
     def __init__(self, pool: AgentPool, gov: AgentGovernor, checkpoints: Any, gateway: Any | None, enabled: bool) -> None:
         self.pool, self.gov, self.checkpoints, self.gateway, self.enabled = pool, gov, checkpoints, gateway, enabled
         self._evaluators = build_slai_evaluators(pool, gov, gateway) if enabled else {}
+        self.documents = ReaderIntake(enabled)                        # PDF/DOCX reading (SLAI Reader), sandboxed
 
     def evaluators(self) -> dict[str, ExternalEvaluator]:
         return dict(self._evaluators)
@@ -43,7 +45,9 @@ class SlaiRuntime:
             return False
 
     def health(self, deep: bool = False) -> dict[str, Any]:
-        return slai_health(self.pool, self.gov, self.checkpoints, deep=deep)
+        out = slai_health(self.pool, self.gov, self.checkpoints, deep=deep)
+        out["reader"] = self.documents.health(deep=deep)
+        return out
 
     def shutdown(self) -> None:
         self.gov.shutdown()

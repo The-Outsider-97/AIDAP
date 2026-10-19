@@ -27,16 +27,26 @@ It is not merely detecting bad data, but making an auditable decision about whet
 
 # Quick start
 
-```bash
-cd SLAI/applications
-pip install -r AIDAP/requirements.txt            # on top of SLAI's own requirements
-python -m AIDAP check                            # self-test: database, SLAI agents, checkpointing, scanner, billing
-python -m AIDAP serve                            # http://127.0.0.1:8780  (web app + API)
+Start from the SLAI repository root (the folder that contains `src/`, `checkpointing/` and `applications/`), with SLAI's virtual environment active:
+
+```powershell
+cd <your SLAI folder>                              # e.g. G:\GAIA\AI\SLAI
+pip install -r applications/AIDAP/requirements.txt # on top of SLAI's own requirements
+python applications/AIDAP/run.py check             # self-test: database, SLAI agents, checkpointing, scanner, billing
+python applications/AIDAP/run.py serve             # http://127.0.0.1:8780  (web app + API)
 ```
+
+`run.py` works from any folder. The equivalent `python -m AIDAP ...` only works when you stand in `applications/` (the folder that
+*contains* `AIDAP/`), not inside `AIDAP/` itself. AIDAP must live at `<SLAI>/applications/AIDAP`: it imports SLAI's `src/functions` and
+`checkpointing/` from two levels up.
 
 Open the app, create an account (free **Developer** plan), pick an intended-use profile, drop a file in, and read the decision.
 Plans: Developer €0 · Starter €39 · Team €149 · Business €499 · Enterprise on request (all per month, excl. VAT).
 Business contact: info.remy3design@gmail.com.
+
+Also in the workspace: **Insights** (whitepaper KPIs, review SLA, Prometheus export on Team and above), **Test suites** with a publish gate
+(Starter and above), finding feedback, asset history, profile suggestion from a sample, near-duplicate and outlier checks, and upstream
+check results from Great Expectations, Soda or any CI tool (`provenance.upstream`). A light/dark switch is in the header.
 
 | Read | |
 |---|---|
@@ -45,10 +55,11 @@ Business contact: info.remy3design@gmail.com.
 | `docs/API.md`, `docs/contracts/` | HTTP reference and JSON contracts |
 | `docs/SECURITY.md` | security model |
 | `docs/OVERLAP.md` | what AIDAP reuses from SLAI (`src/functions`, `checkpointing/`) and why `src/tuning` is unused |
+| `sdk/README.md` | CLI, CI annotations, MCP server, Great Expectations and Soda gates |
 | `sdk/README.md` | Python client and CI gate |
 | `frontend/` | React 19 + TypeScript web app (prebuilt in `frontend/dist`; rebuild with `npm run build`) |
 
-Tests: `cd SLAI/applications && python -m unittest AIDAP.tests.test_pipeline AIDAP.tests.test_api AIDAP.tests.test_sdk AIDAP.tests.test_engine`.
+Tests (from `<SLAI>/applications`): `python -m unittest AIDAP.tests.test_pipeline AIDAP.tests.test_api AIDAP.tests.test_sdk AIDAP.tests.test_engine AIDAP.tests.test_documents`.
 
 # 4. Canonical dependency hierarchy
 

@@ -6,3 +6,5 @@ PyYAML>=6.0
 cryptography>=42.0
 python-multipart>=0.0.9
 colorama>=0.4.6        # SLAI's logger calls colorama.just_fix_windows_console (older versions raise AttributeError on import)
+pypdf>=4.0              # PDF reading through SLAI's Reader (SLAI already requires it)
+phonenumbers>=8.13      # imported by SLAI's src/functions package (phone_verification.py) but missing from SLAI's own requirements.txt

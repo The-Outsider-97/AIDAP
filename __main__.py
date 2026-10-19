@@ -20,6 +20,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .domain.utils.domain_errors import AIDAPError
+
 
 def _services(args: argparse.Namespace) -> Any:
     from .bootstrap import bootstrap
@@ -150,7 +152,13 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     for h in logging.getLogger().handlers:
         h.addFilter(_TolerantFormat())
-    return int(args.fn(args) or 0)
+    try:
+        return int(args.fn(args) or 0)
+    except AIDAPError as exc:                       # a configuration/environment problem: say what, not a stack trace
+        if args.verbose:
+            raise
+        print(f"AIDAP cannot start: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

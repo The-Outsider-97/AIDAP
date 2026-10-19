@@ -117,6 +117,26 @@ class Api(unittest.TestCase):
         lst = c.get("/api/v1/runs?decision=pass").json()
         self.assertEqual(lst["total"], 1)
 
+    def test_pdf_and_docx_uploads_are_read_and_released_as_the_original_bytes(self):
+        from ..slai.reader_intake import ReaderIntake
+        if not ReaderIntake().enabled:
+            self.skipTest("SLAI Reader is not available")
+        from . import documents as D
+        c, _ = self.new_user()
+        proj = c.get("/api/v1/projects").json()[0]
+        body = CLEAN[0]["body"]
+        for name, data in (("leave.pdf", D.pdf([body])), ("leave.docx", D.docx([body]))):
+            run = c.upload("/api/v1/runs", {"project_id": proj["id"], "profile_id": "rag_indexing", "source_class": "internal_doc",
+                                             "metadata": json.dumps(META), "wait": "true"}, name, data).json()
+            self.assertEqual((run["state"], run["decision"]), ("completed", "pass"), run)
+            art = c.get(f"/api/v1/runs/{run['id']}/artifact")
+            self.assertEqual((art.status, art.body), (200, data))
+        bad = c.upload("/api/v1/runs", {"project_id": proj["id"], "profile_id": "rag_indexing", "source_class": "internal_doc",
+                                         "metadata": json.dumps(META), "wait": "true"}, "macro.docx",
+                       D.docx([body], macros=True)).json()
+        self.assertNotEqual(bad["decision"], "pass")
+        self.assertEqual(c.get(f"/api/v1/runs/{bad['id']}/artifact").status, 403)
+
     def test_secret_run_cannot_be_downloaded(self):
         c, _ = self.new_user()
         proj = c.get("/api/v1/projects").json()[0]
