@@ -1,0 +1,23 @@
+id: feature_table
+name: Structured feature table
+task: feature_table
+description: "Tabular features or records feeding a model or analytics job. Schema, missingness, duplicates, extreme values and drift against an approved baseline are checked; upstream monitoring results are consumed when supplied."
+audience: [models, analysts]
+source_classes: [internal_doc, customer_upload, third_party]
+max_classification: internal
+destinations: [local_index, internal_model, training_set]
+freshness_days: 30
+privacy:
+  purpose: model_features
+  allowed_types: []
+  redact_instead_of_block: false
+required_checks: [intake.format, quality.structural, quality.statistical, quality.duplicates, privacy.pii]
+optional_checks: [quality.anomaly, quality.relationship, temporal.freshness, provenance.origin, provenance.upstream, safety.injection, slai.quality, slai.privacy]
+thresholds:
+  min_records: 30
+  max_missing_ratio: 0.1
+  max_duplicate_ratio: 0.02
+  max_near_duplicate_ratio: 0.1
+  outlier_z: 5
+  min_baseline_sample: 30
+tags: [tabular]

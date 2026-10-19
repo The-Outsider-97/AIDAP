@@ -13,7 +13,7 @@ from starlette.routing import Route
 from ..app.services import Services
 from ..contracts.versions import ERROR_SCHEMA
 from ..workers import WorkerLoop
-from . import routes_core, routes_runs, routes_workspace  # noqa: F401  (importing registers the routes)
+from . import routes_core, routes_insights, routes_runs, routes_workspace  # noqa: F401  (importing registers the routes)
 from .http import build_routes, security_headers
 
 __all__ = ["create_app", "FRONTEND_DIST"]

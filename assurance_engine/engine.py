@@ -75,7 +75,7 @@ class AssuranceEngine:
 
     def prepare(self, request: EngineRequest) -> EvalContext:
         norm = normalize(request.data, filename=request.filename, declared_media_type=request.declared_media_type,
-                         limits=request.limits, isolate=request.isolate)
+                         limits=request.limits, isolate=request.isolate, document_reader=request.document_reader)
         meta = normalize_source_metadata(request.source_metadata, norm.metadata)
         ctx = EvalContext(norm=norm, profile=request.profile, policy=request.policy, destination=request.destination,
                           classification=request.classification, source_class=request.source_class,

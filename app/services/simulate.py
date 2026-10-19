@@ -58,6 +58,7 @@ class SimulationService:
             data=content, profile=prof, policy=pol, filename=filename, destination=DestinationClass.parse(destination),
             classification=DataClassification.parse(classification), source_class=SourceClass.parse(source_class),
             source_metadata=metadata or {}, av=self.d.scanner.scan(content),
+            document_reader=getattr(self.d.slai, "documents", None),
             limits=Limits(max_bytes=MAX_SIMULATION_BYTES, max_chars=self.d.settings.max_text_chars,
                           parse_timeout_s=float(self.d.settings.parse_timeout)),
             now=self.d.now(), withheld=withheld, run_id="simulation")

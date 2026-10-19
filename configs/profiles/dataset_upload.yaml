@@ -11,7 +11,7 @@ privacy:
   allowed_types: []
 fields: []
 required_checks: [intake.format, quality.structural, quality.statistical, quality.duplicates, privacy.pii, safety.injection]
-optional_checks: [quality.relationship, quality.anomaly, slai.quality, slai.privacy, slai.safety]
+optional_checks: [quality.relationship, quality.anomaly, slai.quality, slai.privacy, slai.safety, provenance.upstream]
 thresholds:
   min_records: 10
   max_missing_ratio: 0.2

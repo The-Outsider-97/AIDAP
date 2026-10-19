@@ -12,7 +12,8 @@ __all__ = ["SIGNUP", "LOGIN", "PASSWORD_CHANGE", "PASSWORD_RESET_REQUEST", "PASS
            "LINT", "DESTINATION_CREATE", "DESTINATION_UPDATE", "BASELINE_PROPOSE", "RUN_SUBMIT", "RUN_JSON",
            "REVIEW_RESOLVE", "REVIEW_ASSIGN", "QUARANTINE_ACCESS", "QUARANTINE_DISPOSE", "CHECKOUT", "TOPUP",
            "BILLING_SETTINGS", "SCHEDULE_CREATE", "SCHEDULE_UPDATE", "CONTACT", "REDACT", "SIMULATE_FIELDS",
-           "RUN_FIELDS_MULTIPART", "ALERT_ACK"]
+           "RUN_FIELDS_MULTIPART", "ALERT_ACK", "FINDING_FEEDBACK", "SUITE_CREATE", "SUITE_CASE", "SUITE_RUN",
+           "PUBLISH_GATE", "SUGGEST_FIELDS"]
 
 _SLUG = r"[A-Za-z0-9][A-Za-z0-9_.\-]{0,63}"
 
@@ -30,7 +31,7 @@ _ROLES = [r.value for r in Role if r != Role.OWNER]
 INVITE_CREATE = {"email": email(), "role": enum(_ROLES, required=True), "project_ids": lst(s(80), max=50)}
 INVITE_ACCEPT = {"token": s(200, required=True), "name": s(120, default=""), "password": s(256, default="", strip=False)}
 MEMBER_UPDATE = {"role": enum(_ROLES, required=True), "project_ids": lst(s(80), max=50)}
-TENANT_UPDATE = {"name": s(120, min=2), "retention_days": i(1, 3650, nullable=True)}
+TENANT_UPDATE = {"name": s(120, min=2), "retention_days": i(1, 3650, nullable=True), "review_sla_hours": i(1, 720)}
 API_KEY_CREATE = {"name": s(80, min=1, required=True),
                   "scopes": lst(enum(list(SCOPE_PERMISSIONS)), min=1, max=10, required=True),
                   "project_ids": lst(s(80), max=50), "expires_in_days": i(1, 730, nullable=True)}
@@ -96,3 +97,13 @@ SCHEDULE_UPDATE = {"name": s(100, min=2), "interval_minutes": i(15, 10080), "sou
 CONTACT = {"name": s(120, min=1, required=True), "email": email(), "company": s(160),
            "topic": enum(["enterprise", "sales", "support", "security", "other"], default="enterprise"),
            "message": s(4000, min=10, required=True), "website": s(200)}   # `website` is a honeypot
+
+FINDING_FEEDBACK = {"verdict": enum(["useful", "false_positive", "unclear"], required=True), "note": s(300)}
+SUITE_CREATE = {"name": s(100, min=2, required=True), "description": s(500), "project_id": s(80)}
+SUITE_CASE = {"name": s(100), "expected": enum(["pass", "review", "quarantine", "block"], required=True),
+              "expected_codes": lst(s(120), max=20), "destination": enum([d.value for d in DestinationClass], default="local_index"),
+              "source_class": enum(_SOURCE, default="unknown"), "classification": enum(_CLASSIF, default="internal"),
+              "metadata": free(), "note": s(300), "content": s(200_000, strip=False), "filename": s(200, default="sample.txt")}
+SUITE_RUN = {"profile": free(), "profile_id": s(80), "policy": free(), "policy_id": s(80)}
+PUBLISH_GATE = {"suite_ids": lst(s(80), max=5), "profile_id": s(80), "policy_id": s(80)}
+SUGGEST_FIELDS = {"name": s(100), "task": s(80), "content": s(5_000_000, strip=False), "filename": s(200, default="sample.csv")}

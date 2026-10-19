@@ -347,7 +347,8 @@ class RetentionService:
         return {"run_id": run_id, "deleted": True, "already": False}
 
     EXPORT_COLLECTIONS = ("projects", "runs", "decisions", "reviews", "grants", "destinations", "configs", "baselines",
-                          "schedules", "alerts", "deliveries", "memberships", "usage", "quarantine")
+                          "schedules", "alerts", "deliveries", "memberships", "usage", "quarantine", "assets",
+                          "finding_feedback", "suites", "suite_cases", "suite_runs")
 
     def export_tenant(self, p: Principal) -> dict[str, Any]:
         """A machine-readable copy of the organisation's records. Stored content and credentials are not included."""

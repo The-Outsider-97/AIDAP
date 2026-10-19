@@ -14,7 +14,7 @@ privacy:
   allowed_types: []
   redact_instead_of_block: true
 required_checks: [intake.format, quality.structural, quality.metadata, temporal.freshness, temporal.supersession, privacy.pii, safety.injection]
-optional_checks: [quality.duplicates, semantic.conflicts, provenance.origin, slai.quality, slai.privacy, slai.safety, slai.provenance, slai.semantic]
+optional_checks: [quality.duplicates, semantic.conflicts, provenance.origin, provenance.upstream, slai.quality, slai.privacy, slai.safety, slai.provenance, slai.semantic]
 thresholds:
   min_text_chars: 50
   max_duplicate_ratio: 0.05

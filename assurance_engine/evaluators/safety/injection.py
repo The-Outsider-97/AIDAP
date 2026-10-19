@@ -104,19 +104,73 @@ def check_injection(ctx: EvalContext) -> CheckResult:
             "safety.injection", code, title, sev, f"{len(items)} occurrence(s) matching '{name}'", inf, conf,
             "Remove the content or have a security reviewer assess it; do not index it unreviewed.",
             pointers=ptrs, count=len(items), tags=["injection", kind], data={"pattern": name}))
-    hidden = (ctx.norm.html or {}).get("hidden_text") or []
+    hidden = list((ctx.norm.html or {}).get("hidden_text") or []) + list(ctx.norm.detection.get("hidden_text") or [])
     if hidden:
         suspicious = [h for h in hidden if _INSTR_WORDS.search(h)]
         findings.append(make_finding(
             "safety.injection", "safety.injection.hidden_text",
-            "Hidden HTML text" + (" containing instruction-like words" if suspicious else ""),
+            "Hidden text" + (" containing instruction-like words" if suspicious else ""),
             Severity.HIGH if suspicious else Severity.MEDIUM,
-            f"{len(hidden)} hidden text element(s) (display:none, hidden, zero font size or similar)",
+            f"{len(hidden)} hidden text element(s) (display:none, hidden, zero font size, Word 'hidden' formatting or similar)",
             "Hidden text is read by models and scrapers but not by people reviewing the page.",
             Confidence.deterministic(), "Remove hidden elements or confirm they are intentional.",
             count=len(hidden), tags=["injection", "hidden"], data={"instruction_like": len(suspicious)}))
     return finish(ctx, "safety.injection", findings, coverage=1.0 if total == 0 else min(1.0, scanned / total),
                   metrics={"scanned_chars": scanned}, name="aidap.safety.injection_patterns")
+
+
+def _document_findings(a: dict, fmt: str) -> list:
+    """What a PDF or Word file contains besides text: scripts, macros, embedded files, remote references."""
+    out = []
+    if fmt == "pdf":
+        active = int(a.get("javascript", 0)) + int(a.get("launch", 0))
+        if active:
+            out.append(make_finding(
+                "safety.file", "safety.file.active_content", "PDF contains scripts or launch actions", Severity.HIGH,
+                f"JavaScript actions: {a.get('javascript', 0)}; launch actions: {a.get('launch', 0)}"
+                + ("; runs on open" if a.get("open_action") else ""),
+                "Scripts and launch actions run in some PDF viewers. They are not needed in a document used as data.",
+                Confidence.deterministic("PDF object structure and bytes"),
+                "Export a clean copy of the document (print to PDF or save as text) and resubmit.", tags=["pdf", "active"]))
+        if a.get("embedded_files"):
+            out.append(make_finding(
+                "safety.file", "safety.file.embedded_files", "PDF contains embedded files", Severity.MEDIUM,
+                f"{a.get('embedded_files')} attached file(s)",
+                "Attachments are not opened or assessed, so part of what would be released is unchecked.",
+                Confidence.deterministic("PDF object structure"), "Submit the attachments separately, or remove them.",
+                tags=["pdf", "embedded"]))
+        if a.get("xfa"):
+            out.append(make_finding(
+                "safety.file", "safety.file.active_content", "PDF contains an XFA form", Severity.MEDIUM,
+                "XFA form definition present", "XFA forms are scriptable XML forms that this version does not assess.",
+                Confidence.deterministic("PDF object structure"), "Flatten the form before submitting.", tags=["pdf", "form"]))
+    elif fmt == "docx":
+        if a.get("macros"):
+            out.append(make_finding(
+                "safety.file", "safety.file.macros", "Word document contains macros", Severity.HIGH,
+                "VBA project or macro-enabled content type present",
+                "Macros are code. They are not needed in a document used as data and are a common malware route.",
+                Confidence.deterministic("package members"), "Save a copy without macros and resubmit.", tags=["docx", "macro"]))
+        if a.get("remote_template"):
+            out.append(make_finding(
+                "safety.file", "safety.file.external_reference", "Word document loads a remote template", Severity.HIGH,
+                "attachedTemplate relationship points to an external location",
+                "A remote template is fetched when the document opens and can bring in macros from elsewhere.",
+                Confidence.deterministic("package relationships"), "Remove the template link and resubmit.", tags=["docx", "remote"]))
+        elif a.get("external_links"):
+            out.append(make_finding(
+                "safety.file", "safety.file.external_reference", "Word document references external content", Severity.LOW,
+                f"{a.get('external_links')} external relationship(s) (links, linked images or objects)",
+                "Linked content is not part of the file and is not assessed.",
+                Confidence.deterministic("package relationships"), "Embed or remove linked content.", tags=["docx", "link"]))
+        objs = int(a.get("embedded_objects", 0)) + int(a.get("activex", 0))
+        if objs:
+            out.append(make_finding(
+                "safety.file", "safety.file.embedded_files", "Word document contains embedded objects", Severity.MEDIUM,
+                f"{a.get('embedded_objects', 0)} embedded object(s), {a.get('activex', 0)} ActiveX control(s)",
+                "Embedded objects are not opened or assessed, so part of what would be released is unchecked.",
+                Confidence.deterministic("package members"), "Remove the objects or submit them separately.", tags=["docx", "embedded"]))
+    return out
 
 
 def check_file(ctx: EvalContext) -> CheckResult:
@@ -147,11 +201,13 @@ def check_file(ctx: EvalContext) -> CheckResult:
             "safety.file", "safety.file.macro_container", "Legacy Office container", Severity.HIGH, f"File content is {label}",
             "Legacy Office containers can carry macros; AIDAP does not open them.", Confidence.deterministic("magic bytes"),
             "Export to text or CSV from a trusted system and resubmit.", tags=["office"]))
-    elif risk == "archive":
+    elif risk == "archive" and not n.detection.get("document"):
         findings.append(make_finding(
             "safety.file", "safety.file.archive", "Archive or container file", Severity.MEDIUM, f"File content is {label}",
             "Archives are not opened in this version, so their content is not assessed.", Confidence.deterministic("magic bytes"),
             "Extract trusted files and submit them individually.", tags=["archive"]))
+    elif n.detection.get("document"):
+        pass                                           # PDF/DOCX read by the document reader; judged below on what they contain
     elif risk in ("document", "image", "database", "binary"):
         findings.append(make_finding(
             "safety.file", "safety.file.unsupported_binary", "Unsupported binary format", Severity.LOW,
@@ -165,6 +221,7 @@ def check_file(ctx: EvalContext) -> CheckResult:
             f"javascript: URLs={h.get('js_urls', 0)}, embedded frames={h.get('iframes', 0)}",
             "Active content is stripped from the normalized text but should not be passed on.",
             Confidence.deterministic(), "Submit the content without scripts or embedded frames.", tags=["html"]))
+    findings += _document_findings(n.detection.get("active_content") or {}, det.get("format", ""))
     if det.get("mismatch"):
         findings.append(make_finding(
             "safety.file", "safety.file.type_mismatch", "Declared type differs from content", Severity.LOW,

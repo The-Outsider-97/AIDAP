@@ -1,0 +1,18 @@
+id: agent_tool_output
+name: Agent tool output
+task: agent_tool_output
+description: "Results returned by a tool, API or retrieval step before an agent reads them. Embedded instructions, hidden text, credentials and personal data are screened first; nothing here is judged for factual accuracy."
+audience: [agents]
+source_classes: [third_party, internal_doc, published, generated, unknown]
+max_classification: internal
+destinations: [internal_model]
+privacy:
+  purpose: agent_tool_context
+  allowed_types: []
+  redact_instead_of_block: true
+required_checks: [intake.format, safety.injection, safety.file, privacy.pii]
+optional_checks: [quality.structural, quality.duplicates, provenance.origin, provenance.upstream, slai.safety, slai.privacy, slai.semantic]
+thresholds:
+  min_text_chars: 1
+  max_near_duplicate_ratio: 0.3
+tags: [agent, tool_output]

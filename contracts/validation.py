@@ -7,6 +7,8 @@ problems are reported together, keyed by path, so a client can fix them in one p
 
 from __future__ import annotations
 
+import json
+
 import re
 from dataclasses import dataclass
 from typing import Any, Callable
@@ -171,6 +173,13 @@ def _one(spec: Field, value: Any, path: str, errors: dict[str, str]) -> Any:
             _fail(errors, path, "must be an ISO-8601 timestamp")
         return value if dt is not None else None
     if k == "list":
+        if isinstance(value, str):                                   # multipart forms carry lists as a JSON array or comma list
+            text = value.strip()
+            try:
+                parsed = json.loads(text) if text.startswith("[") else [x.strip() for x in text.split(",") if x.strip()]
+            except ValueError:
+                parsed = value
+            value = parsed
         if not isinstance(value, list):
             _fail(errors, path, "must be a list")
             return []

@@ -76,13 +76,18 @@ def config_discard_draft(c: Ctx) -> Any:
     return {"ok": True}
 
 
-@both("POST", "/{cid}/versions/{version}/publish")
+@both("POST", "/{cid}/versions/{version}/publish", body=R.PUBLISH_GATE)
 def config_publish(c: Ctx) -> Any:
     try:
         v = int(c.params["version"])
     except ValueError as exc:
         raise ValidationFailed("version must be a number") from exc
-    return c.svc.configs.publish(c.principal, _kind(c), c.params["cid"], v)
+    gate = None
+    if c.body.get("suite_ids"):          # optional regression gate: every named suite must pass against the draft first
+        gate = c.svc.suites.gate(c.principal, _kind(c), c.params["cid"], v, c.body["suite_ids"],
+                                 profile_id=c.body.get("profile_id", ""), policy_id=c.body.get("policy_id", ""))
+    rec = c.svc.configs.publish(c.principal, _kind(c), c.params["cid"], v)
+    return {**rec, "suite_gate": gate} if gate else rec
 
 
 @api("POST", "/lint", body=R.LINT)

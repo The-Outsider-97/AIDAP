@@ -13,7 +13,7 @@ privacy:
   purpose: internal_knowledge
   allowed_types: [email]
 required_checks: [intake.format, quality.structural, quality.metadata, temporal.supersession, privacy.pii, safety.injection]
-optional_checks: [temporal.freshness, quality.duplicates, semantic.conflicts, provenance.origin, slai.quality, slai.privacy, slai.safety, slai.provenance]
+optional_checks: [temporal.freshness, quality.duplicates, semantic.conflicts, provenance.origin, provenance.upstream, slai.quality, slai.privacy, slai.safety, slai.provenance]
 thresholds:
   min_text_chars: 30
   max_duplicate_ratio: 0.1

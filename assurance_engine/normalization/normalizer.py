@@ -29,10 +29,15 @@ def _parsers():
 
 
 def normalize(data: bytes, *, filename: str = "", declared_media_type: str = "", limits: Limits | None = None,
-              isolate: bool = True) -> NormalizedInput:
+              isolate: bool = True, document_reader: Any = None) -> NormalizedInput:
     limits = limits or Limits()
     original = digest_ref(data)
     det: Detection = detect(data, filename, declared_media_type)
+    if det.format == "binary" and document_reader is not None and det.binary_kind in ("pdf", "zip"):
+        doc = document_reader.read(data, filename=filename, max_chars=limits.max_chars,
+                                   timeout_s=limits.parse_timeout_s, memory_mb=limits.parse_memory_mb)
+        if doc and doc.get("handled"):
+            return _from_document(doc, det, data, original, filename)
     if det.format == "binary":
         info = ParseInfo(coverage=0.0, errors=[f"unsupported format: {det.binary_label or 'binary data'}"],
                          format="binary", encoding="n/a")
@@ -64,6 +69,30 @@ def normalize(data: bytes, *, filename: str = "", declared_media_type: str = "",
                            raw.get("segments", []), info, original, normalized_digest(kind, text, records),
                            len(data), len(text.encode("utf-8")) if kind == "text" else len(data), filename,
                            raw.get("html", {}), _det(det))
+
+
+def _from_document(doc: dict[str, Any], det: Detection, data: bytes, original: str, filename: str) -> NormalizedInput:
+    """A PDF or DOCX read by the document reader. A failed read is an error with zero coverage, never an empty success."""
+    fmt = doc.get("format") or det.binary_kind
+    errors, warnings = list(doc.get("errors") or []), list(doc.get("warnings") or [])
+    text = canonical_text(doc.get("text", "")) if not errors else ""
+    document = dict(doc.get("document") or {})
+    mismatch = ""
+    if document.get("extension_mismatch"):
+        mismatch = f"content is {fmt.upper() if fmt else 'a document'} but the file name says {document.get('extension') or 'something else'}"
+    info = ParseInfo(float(doc.get("coverage", 0.0)) if not errors else 0.0, errors, warnings, bool(doc.get("truncated")),
+                     fmt, "n/a", 0, 0, True)
+    if mismatch:
+        info.warnings.append(mismatch)
+    meta = {str(k).lower(): v for k, v in (doc.get("metadata") or {}).items() if v not in (None, "")}
+    detection = {"format": fmt, "media_type": doc.get("media_type") or det.media_type, "binary_kind": det.binary_kind,
+                 "binary_label": det.binary_label, "risk_class": "", "eicar": det.eicar, "mismatch": mismatch,
+                 "document": document, "active_content": dict(doc.get("active_content") or {}),
+                 "hidden_text": list(doc.get("hidden_text") or [])}
+    segments = _parsers()._paragraph_segments(text) if text else []
+    return NormalizedInput("text", fmt, detection["media_type"], text, None, [], meta, segments, info, original,
+                           normalized_digest("text", text, None), len(data), len(text.encode("utf-8")), filename,
+                           {}, detection)
 
 
 def _det(d: Detection) -> dict[str, Any]:

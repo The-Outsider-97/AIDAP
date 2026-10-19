@@ -17,6 +17,7 @@ from ....domain.evaluations import CheckResult, Confidence, Severity, UnknownRea
 from ...normalization.models import NormalizedInput
 from ...normalization.schema import infer_schema, schema_signature
 from ..base import EvalContext, finish, make_finding, not_evaluated, pointer, unknown
+from .similarity import near_duplicates
 
 __all__ = ["check_duplicates", "check_statistical", "check_anomaly", "build_baseline_stats", "BASELINE_SCHEMA"]
 
@@ -109,6 +110,9 @@ def check_duplicates(ctx: EvalContext) -> CheckResult:
                 "Duplicates over-weight some content and inflate counts.", Confidence.deterministic(),
                 "Deduplicate before submitting, or raise max_duplicate_ratio if repetition is intended.",
                 pointers=[pointer(f"records[{i}]") for i in dups[:5]], count=len(dups), data=metrics))
+        findings.extend(_near_findings(
+            [_record_text(r, prof.text_fields) for r in records], set(dups), prof, metrics,
+            lambda i: pointer(f"records[{i}]"), "records"))
     else:
         paras = [p for p in re.split(r"\n\s*\n", n.text) if len(p.strip()) >= 40]
         seen_p: set[str] = set()
@@ -130,8 +134,39 @@ def check_duplicates(ctx: EvalContext) -> CheckResult:
                 f"{dup_n} of {len(paras)} substantial paragraphs ({ratio:.1%}) repeat earlier text; threshold {thr:.1%}",
                 "Repeated passages over-weight content in retrieval.", Confidence.deterministic(),
                 "Remove repeated sections.", count=dup_n, data=metrics))
+        findings.extend(_near_findings(paras, set(), prof, metrics, lambda i: pointer(f"paragraphs[{i}]"), "paragraphs"))
     return finish(ctx, "quality.duplicates", findings, coverage=n.parse.coverage, metrics=metrics,
                   name="aidap.quality.duplicates")
+
+
+def _record_text(rec: dict[str, Any], text_fields: list[str]) -> str:
+    keys = [k for k in text_fields if k in rec] or list(rec)
+    return " ".join(str(rec[k]) for k in keys if isinstance(rec.get(k), (str, int, float)) and not isinstance(rec.get(k), bool))
+
+
+def _near_findings(units: list[str], exact: set[int], prof: Any, metrics: dict[str, Any], ptr: Any, noun: str) -> list:
+    """Near-duplicates (word-trigram Jaccard) that are not exact repeats. A similarity observation only."""
+    if len(units) < 5:
+        return []
+    thr = float(prof.threshold("max_near_duplicate_ratio", 0.1))
+    found = near_duplicates(units, threshold=float(prof.threshold("near_duplicate_similarity", 0.8)),
+                            min_tokens=int(prof.threshold("near_duplicate_min_words", 12)))
+    near = {i: v for i, v in found.items() if i not in exact}
+    ratio = len(near) / len(units)
+    metrics.update({"near_duplicates": len(near), "near_duplicate_ratio": round(ratio, 6)})
+    if not near or ratio <= thr:
+        return []
+    idx = sorted(near)
+    return [make_finding(
+        "quality.duplicates", "quality.duplicates.near", f"Near-duplicate {noun}",
+        Severity.HIGH if ratio > 0.5 else Severity.MEDIUM,
+        f"{len(near)} of {len(units)} {noun} ({ratio:.1%}) are near-copies of earlier ones; threshold {thr:.1%}",
+        "Almost-identical content over-weights one source and can crowd out distinct material.",
+        Confidence.heuristic(round(ratio, 3), "word-trigram Jaccard similarity; not a probability"),
+        "Keep one version of each near-copy, or raise max_near_duplicate_ratio if repetition is intended.",
+        pointers=[ptr(i) for i in idx[:5]], count=len(near),
+        data={"pairs": [{"item": i, "similar_to": near[i][0], "similarity": near[i][1]} for i in idx[:10]],
+              "ratio": round(ratio, 4)})]
 
 
 def check_statistical(ctx: EvalContext) -> CheckResult:
@@ -157,6 +192,7 @@ def check_statistical(ctx: EvalContext) -> CheckResult:
                 "quality.statistical", "quality.statistical.constant", f"Constant column: {c}", Severity.LOW,
                 f"Every value of '{c}' is identical", "A constant column carries no information.",
                 Confidence.deterministic(), "Confirm the column is needed.", data={"field": c}))
+    findings.extend(_outlier_findings(records, stats, prof))
     if 0 < len(records) < 30:
         findings.append(make_finding(
             "quality.statistical", "quality.statistical.small_sample", "Small sample", Severity.INFO,
@@ -165,6 +201,35 @@ def check_statistical(ctx: EvalContext) -> CheckResult:
     ctx.cache["column_stats"] = stats
     return finish(ctx, "quality.statistical", findings, coverage=n.parse.coverage,
                   metrics={"records": len(records), "columns": len(n.columns)}, name="aidap.quality.statistical")
+
+
+def _outlier_findings(records: list[dict[str, Any]], stats: dict[str, dict[str, Any]], prof: Any) -> list:
+    """Robust outliers (modified z-score from the median and MAD). Unusual is not wrong: INFO, LOW above 5% of values."""
+    out = []
+    zmax = float(prof.threshold("outlier_z", 5.0))
+    for c, st in stats.items():
+        if st.get("type") not in ("integer", "number") or st.get("count", 0) < 30:
+            continue
+        pairs = [(i, x) for i, r in enumerate(records) if (x := _as_float(r.get(c))) is not None]
+        vals = sorted(x for _, x in pairs)
+        med = _quantile(vals, 0.5)
+        mad = _quantile(sorted(abs(x - med) for x in vals), 0.5)
+        if mad <= 0:
+            continue
+        flagged = [i for i, x in pairs if abs(0.6745 * (x - med) / mad) > zmax]
+        if not flagged:
+            continue
+        share = len(flagged) / len(pairs)
+        out.append(make_finding(
+            "quality.statistical", "quality.statistical.outliers", f"Extreme values: {c}",
+            Severity.LOW if share > 0.05 else Severity.INFO,
+            f"{len(flagged)} of {len(pairs)} values ({share:.1%}) lie more than {zmax:g} robust deviations from the median",
+            "Extreme values are unusual relative to the rest of this batch. They may be valid.",
+            Confidence.heuristic(round(share, 3), "modified z-score (median/MAD); not a probability"),
+            "Inspect the flagged records; confirm they are real before relying on them.",
+            pointers=[pointer(f"records[{i}].{c}") for i in flagged[:5]], count=len(flagged),
+            data={"field": c, "median": med, "mad": mad, "share": round(share, 4)}))
+    return out
 
 
 def check_anomaly(ctx: EvalContext) -> CheckResult:

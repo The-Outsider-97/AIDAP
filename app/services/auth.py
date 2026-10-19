@@ -482,7 +482,8 @@ class AuthService:
         audit(self.d, p, "apikey.revoked", key_id)
 
     # ------------------------------------------------------------------ tenant settings
-    def update_tenant(self, p: Principal, name: str | None, retention_days: int | None, set_retention: bool) -> dict[str, Any]:
+    def update_tenant(self, p: Principal, name: str | None, retention_days: int | None, set_retention: bool,
+                      review_sla_hours: int | None = None) -> dict[str, Any]:
         p.require(Permission.PROJECTS_MANAGE)
         t = self.d.db.get("tenants", p.tenant_id, tenant_id=p.tenant_id)
         if t is None:
@@ -497,6 +498,9 @@ class AuthService:
             if retention_days and retention_days > plan.evidence_retention_days:
                 raise ValidationFailed(f"retention cannot exceed the plan's {plan.evidence_retention_days} days")
             t["retention_days"] = retention_days
+        if review_sla_hours is not None:
+            t["settings"] = {**(t.get("settings") or {}), "review_sla_hours": int(review_sla_hours)}
         self.d.db.put("tenants", t, tenant_id=p.tenant_id)
-        audit(self.d, p, "tenant.updated", p.tenant_id, {"name": name, "retention_days": retention_days})
+        audit(self.d, p, "tenant.updated", p.tenant_id, {"name": name, "retention_days": retention_days,
+                                                         "review_sla_hours": review_sla_hours})
         return sanitize_doc(t)

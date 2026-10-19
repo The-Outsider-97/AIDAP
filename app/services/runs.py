@@ -214,6 +214,7 @@ class RunService(RunQueries):
             classification=DataClassification.parse(run.get("classification")), source_class=SourceClass.parse(run.get("source_class")),
             source_metadata=version.get("source_metadata") or {}, baseline=baseline["stats"] if baseline else None,
             known_revisions=self._known_revisions(run, version), av=av,
+            document_reader=getattr(self.d.slai, "documents", None),
             limits=Limits(max_bytes=max(plan.max_run_bytes, 1), max_chars=self.d.settings.max_text_chars,
                           parse_timeout_s=float(self.d.settings.parse_timeout)),
             now=self.d.now(), withheld=withheld, run_id=rid)

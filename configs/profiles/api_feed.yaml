@@ -11,7 +11,7 @@ privacy:
   purpose: operational_feed
   allowed_types: []
 required_checks: [intake.format, quality.structural, quality.statistical, temporal.freshness, privacy.pii, safety.injection]
-optional_checks: [quality.duplicates, quality.anomaly, quality.relationship, provenance.origin, slai.quality]
+optional_checks: [quality.duplicates, quality.anomaly, quality.relationship, provenance.origin, provenance.upstream, slai.quality]
 thresholds:
   date_field: updated_at
   max_stale_ratio: 0.1

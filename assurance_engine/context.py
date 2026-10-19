@@ -32,6 +32,7 @@ class EngineRequest:
     av: dict[str, Any] | None = None
     limits: Limits = field(default_factory=Limits)
     isolate: bool = True
+    document_reader: Any = None                   # DocumentReader port (PDF/DOCX); None => those formats stay unsupported
     run_id: str = ""
     withheld: dict[str, str] = field(default_factory=dict)   # check_id -> reason (plan/budget); recorded as NOT_EVALUATED
     now: datetime = field(default_factory=lambda: datetime.now(timezone.utc))

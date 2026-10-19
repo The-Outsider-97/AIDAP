@@ -10,12 +10,14 @@ from ..deps import Deps
 from .auth import AuthService
 from .catalog import ConfigService
 from .delivery import DeliveryRetry, DeliveryService
+from .insights import AssetQueries, InsightsService
 from .notify import NotificationService
 from .ops import BillingService, ContactService, DashboardQueries, RetentionService, ScheduleRunner
 from .plans import PlanService, UsageService
 from .review import QuarantineService, ReviewService
 from .runs import RunService
 from .simulate import SimulationService
+from .suites import SuggestionService, SuiteService
 from .workspace import (AlertService, AuditQueries, BaselineService, DestinationService, ProjectService,
                         ScheduleService)
 
@@ -48,6 +50,10 @@ class Services:
     contact: ContactService
     dashboard: DashboardQueries
     simulation: SimulationService
+    insights: InsightsService
+    assets: AssetQueries
+    suites: SuiteService
+    suggestions: SuggestionService
 
     # ------------------------------------------------------------------ background work
     def process_job(self, job: Any) -> str:
@@ -88,7 +94,7 @@ class Services:
         """Periodic duties: due schedules, outbox sweep, exception expiry, retention, quarantine retention."""
         return {"schedules": self.scheduler.tick(), "outbox": self.notify.sweep(),
                 "exceptions": self.reviews.sweep_expired(), "quarantine": self.quarantine.sweep(),
-                "retention": self.retention.sweep()}
+                "retention": self.retention.sweep(), "review_sla": self.insights.sweep_overdue()}
 
 
 def build_services(deps: Deps) -> Services:
@@ -101,6 +107,7 @@ def build_services(deps: Deps) -> Services:
     baselines = BaselineService(deps, plans)
     delivery = DeliveryService(deps, plans, alerts)
     runs = RunService(deps, plans, usage, baselines, alerts, notify, delivery)
+    simulation = SimulationService(deps, plans)
     return Services(
         deps=deps, plans=plans, usage=usage, notify=notify, auth=AuthService(deps, plans, notify), configs=configs,
         projects=ProjectService(deps, plans), destinations=DestinationService(deps, plans), baselines=baselines,
@@ -108,4 +115,5 @@ def build_services(deps: Deps) -> Services:
         runs=runs, reviews=ReviewService(deps, plans, runs), quarantine=QuarantineService(deps),
         billing=BillingService(deps, plans, notify, alerts), scheduler=ScheduleRunner(deps, plans, runs, alerts),
         retention=RetentionService(deps, plans), contact=ContactService(deps, notify), dashboard=DashboardQueries(deps, usage),
-        simulation=SimulationService(deps, plans))
+        simulation=simulation, insights=InsightsService(deps, plans, alerts), assets=AssetQueries(deps),
+        suites=SuiteService(deps, plans, simulation), suggestions=SuggestionService(deps, plans))

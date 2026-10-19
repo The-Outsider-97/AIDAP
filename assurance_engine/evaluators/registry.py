@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .base import Evaluator
-from .fitness import check_intended_use, check_origin
+from .fitness import check_intended_use, check_origin, check_upstream
 from .privacy.checks import check_destination, check_pii
 from .quality.population import check_anomaly, check_duplicates, check_statistical
 from .quality.relationship import check_relationship
@@ -33,4 +33,5 @@ NATIVE_EVALUATORS: dict[str, Evaluator] = {e.check_id: e for e in (
     _E("safety.file", "aidap.safety.file", check_file),
     _E("safety.injection", "aidap.safety.injection_patterns", check_injection),
     _E("provenance.origin", "aidap.provenance.metadata", check_origin),
+    _E("provenance.upstream", "aidap.provenance.upstream_signals", check_upstream),
 )}

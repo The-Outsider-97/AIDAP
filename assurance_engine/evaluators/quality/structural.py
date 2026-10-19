@@ -26,7 +26,7 @@ def check_format(ctx: EvalContext) -> CheckResult:
         findings.append(make_finding(
             "intake.format", "intake.unsupported_format", "Unsupported file format", Severity.HIGH,
             f"Content is {n.detection.get('binary_label') or 'binary data'}",
-            "AIDAP v1 reads text, Markdown, HTML, JSON, JSON Lines, CSV and TSV. It cannot assess other formats.",
+            "AIDAP reads text, Markdown, HTML, JSON, JSON Lines, CSV and TSV, and PDF and DOCX when the SLAI Reader is available. It cannot assess other formats.",
             Confidence.deterministic("magic bytes"), "Convert the data to a supported format and resubmit."))
         return finish(ctx, "intake.format", findings, coverage=0.0, name="aidap.intake.format")
     if p.errors:
@@ -37,7 +37,8 @@ def check_format(ctx: EvalContext) -> CheckResult:
     if p.coverage < 1.0 and not p.errors:
         findings.append(make_finding(
             "intake.format", "intake.parse_incomplete", "Only part of the input was examined", Severity.MEDIUM,
-            f"Parse coverage {p.coverage:.1%}" + (" (truncated at the configured limit)" if p.truncated else ""),
+            f"Parse coverage {p.coverage:.1%}" + (" (truncated at the configured limit)" if p.truncated else "")
+            + "".join(f"; {w}" for w in p.warnings if "text layer" in w or "pages were read" in w),
             "Findings describe the examined part only; the rest is unassessed.", Confidence.deterministic(),
             "Submit smaller batches, or raise the limits on a plan that allows it."))
     if p.ragged_rows:
@@ -47,8 +48,11 @@ def check_format(ctx: EvalContext) -> CheckResult:
             Confidence.deterministic(), "Check quoting and delimiters in the source export."))
     if not n.text.strip() and not (n.records or []) and not p.errors:
         findings.append(make_finding(
-            "intake.format", "intake.empty", "The input is empty", Severity.HIGH, "No readable content",
-            "An empty input cannot be fit for any use.", Confidence.deterministic(), "Submit the intended content."))
+            "intake.format", "intake.empty", "The input is empty", Severity.HIGH,
+            "No readable content" + "".join(f"; {w}" for w in p.warnings if "text layer" in w),
+            "An empty input cannot be fit for any use.", Confidence.deterministic(),
+            "Submit a text-searchable version (run OCR first if this is a scan)." if any("text layer" in w for w in p.warnings)
+            else "Submit the intended content."))
     for w in p.warnings:
         if "UTF-8" in w:
             findings.append(make_finding(

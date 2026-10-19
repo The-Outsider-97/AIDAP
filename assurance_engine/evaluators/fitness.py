@@ -1,13 +1,16 @@
-"""fitness.intended_use and provenance.origin."""
+"""fitness.intended_use, provenance.origin and provenance.upstream."""
 
 from __future__ import annotations
 
-from ...domain.data.classification import DataClassification, DestinationClass
-from ...domain.evaluations import CheckResult, Confidence, Severity
-from ..ingestion.provenance import lookup
-from .base import EvalContext, finish, make_finding
+from datetime import datetime, timedelta
 
-__all__ = ["check_intended_use", "check_origin"]
+from ...domain.data.classification import DataClassification, DestinationClass
+from ...domain.evaluations import CheckResult, Confidence, Severity, UnknownReason
+from ..ingestion.provenance import lookup
+from ..ingestion.signals import collect_signals
+from .base import EvalContext, finish, make_finding, not_evaluated
+
+__all__ = ["check_intended_use", "check_origin", "check_upstream"]
 
 
 def check_intended_use(ctx: EvalContext) -> CheckResult:
@@ -91,3 +94,53 @@ def check_origin(ctx: EvalContext) -> CheckResult:
     return finish(ctx, "provenance.origin", findings, coverage=1.0,
                   metrics={"origin": "asserted", "owner": bool(owner), "source": bool(source)},
                   name="aidap.provenance.metadata")
+
+
+def check_upstream(ctx: EvalContext) -> CheckResult:
+    name = "aidap.provenance.upstream_signals"
+    signals = collect_signals(ctx.source_metadata)
+    required = bool(ctx.profile.threshold("require_upstream_signals", False))
+    if not signals and not required:
+        return not_evaluated(ctx, "provenance.upstream", UnknownReason.NOT_APPLICABLE,
+                             "No upstream monitoring signals were supplied.", name=name)
+    findings = []
+    if not signals:
+        findings.append(make_finding(
+            "provenance.upstream", "provenance.upstream.missing", "No upstream check results supplied", Severity.MEDIUM,
+            "The profile requires results from the upstream data-quality tool; none were supplied",
+            "AIDAP cannot tell whether the source's own checks ran.", Confidence.deterministic(),
+            "Submit the upstream result in the 'upstream_checks' metadata."))
+    max_age = timedelta(hours=float(ctx.profile.threshold("upstream_max_age_hours", 72)))
+    for s in signals:
+        label = f"{s['source']}/{s['name']}"
+        if s["status"] == "failed":
+            findings.append(make_finding(
+                "provenance.upstream", "provenance.upstream.failed", f"Upstream check failed: {label}", Severity.HIGH,
+                f"{label} reported 'failed'" + (f" ({s['detail']})" if s.get("detail") else ""),
+                "The tool that monitors this source found a problem before the data reached the gate.",
+                Confidence.deterministic(), "Resolve the upstream failure, then resubmit.", data={"signal": s}))
+        elif s["status"] == "warning":
+            findings.append(make_finding(
+                "provenance.upstream", "provenance.upstream.warning", f"Upstream check warning: {label}", Severity.LOW,
+                f"{label} reported 'warning'", "The upstream tool raised a non-blocking concern.",
+                Confidence.deterministic(), "Review the upstream warning.", data={"signal": s}))
+        elif s["status"] == "unknown":
+            findings.append(make_finding(
+                "provenance.upstream", "provenance.upstream.unrecognised", f"Upstream status not understood: {label}",
+                Severity.LOW, f"{label} reported a status AIDAP does not recognise",
+                "A signal that cannot be read is treated as unknown, not as a pass.", Confidence.deterministic(),
+                "Use one of: passed, warning, failed.", data={"signal": s}))
+        if s.get("observed_at"):
+            try:
+                when = datetime.fromisoformat(s["observed_at"])
+                if ctx.now - when > max_age:
+                    findings.append(make_finding(
+                        "provenance.upstream", "provenance.upstream.stale", f"Upstream result is old: {label}",
+                        Severity.MEDIUM, f"Observed {s['observed_at'][:16]}; allowed age {max_age}",
+                        "An old result says nothing about the current content.", Confidence.deterministic(),
+                        "Re-run the upstream check and resubmit.", data={"signal": s}))
+            except ValueError:
+                pass
+    return finish(ctx, "provenance.upstream", findings, coverage=1.0,
+                  metrics={"signals": len(signals), "failed": sum(1 for s in signals if s["status"] == "failed"),
+                           "asserted": True}, name=name)

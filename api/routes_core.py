@@ -174,7 +174,8 @@ def mfa_disable(c: Ctx) -> Any:
 @api("PATCH", "/tenant", body=R.TENANT_UPDATE)
 def tenant_update(c: Ctx) -> Any:
     b = c.body
-    return c.svc.auth.update_tenant(c.principal, b.get("name") or None, b.get("retention_days"), "retention_days" in c.present)
+    return c.svc.auth.update_tenant(c.principal, b.get("name") or None, b.get("retention_days"), "retention_days" in c.present,
+                                    b.get("review_sla_hours") if "review_sla_hours" in c.present else None)
 
 
 @api("GET", "/members")

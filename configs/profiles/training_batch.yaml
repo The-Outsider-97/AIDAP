@@ -10,7 +10,7 @@ privacy:
   purpose: model_training
   allowed_types: []
 required_checks: [intake.format, quality.structural, quality.statistical, quality.duplicates, quality.anomaly, privacy.pii, safety.injection]
-optional_checks: [semantic.rules, quality.relationship, slai.quality, slai.privacy, slai.safety]
+optional_checks: [semantic.rules, quality.relationship, slai.quality, slai.privacy, slai.safety, provenance.upstream]
 thresholds:
   min_records: 30
   max_missing_ratio: 0.1
