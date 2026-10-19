@@ -12,7 +12,7 @@ export function Alerts() {
   const { busy, run: act } = useAction();
   return (
     <>
-      <PageHeader title="Alerts" sub="Credential exposure, quarantines and repeated failures. Repeats are grouped." />
+      <PageHeader title="Alerts" sub="Credential exposure, quarantines, overdue reviews and repeated failures. Repeats are grouped." />
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.length ? <Empty title="No alerts" /> : (
         <div className="stack">{q.data.map((a) => (
           <div className="card tight" key={a.id} style={a.acknowledged_at ? { opacity: 0.6 } : undefined}>
@@ -71,7 +71,7 @@ export function SystemStatus() {
   const agents = Object.entries(s.slai?.agents ?? {}) as [string, any][];
   return (
     <>
-      <PageHeader title="System & SLAI status" sub="What is available to this installation right now. Checks that depend on an unavailable component are reported as not evaluated — never silently skipped."
+      <PageHeader title="System & SLAI status" sub="Available components. Checks that depend on an unavailable component are reported as not evaluated."
         actions={<button className="btn" onClick={q.reload}>Refresh</button>} />
       <div className="stack lg">
         <div className="card">

@@ -82,7 +82,7 @@ export function NewRun() {
 
   return (
     <>
-      <PageHeader title="New validation" sub="Choose what the input is for. AIDAP checks it against that purpose and returns a decision with evidence." />
+      <PageHeader title="New validation" sub="Checked against its intended use. Returns a decision with evidence." />
       {!d.projects.length ? <div className="alert warn">You need a project first. <Link to="/app/projects">Create one</Link>.</div> : (
         <div className="grid split">
           <form className="stack" onSubmit={submit}>
@@ -110,7 +110,7 @@ export function NewRun() {
               {prof && <p className="muted small" style={{ margin: 0 }}>{prof.description}</p>}
               <Field label="Label" hint="Optional name to find this run later."><input value={f.label} onChange={set("label")} maxLength={120} /></Field>
               <Field label="Metadata (JSON)" hint="Owner, source revision, effective date — whatever your profile requires.">
-                <textarea value={f.metadata} onChange={set("metadata")} placeholder='{"owner": "HR Team", "source_revision": "3", "effective_date": "2026-09-01"}' spellCheck={false} />
+                <textarea value={f.metadata} onChange={set("metadata")} placeholder='{"owner": "HR Team", "source_revision": "3", "effective_date": "2026-09-01", "upstream_checks": [{"source": "dbt", "name": "not_null_id", "status": "passed"}]}' spellCheck={false} />
               </Field>
               {err && <div className="alert error" role="alert">{err}</div>}
               <div className="row"><button className="btn primary lg" disabled={busy || !file}>{busy ? "Validating…" : "Validate"}</button>

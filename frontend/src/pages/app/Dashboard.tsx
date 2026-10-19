@@ -12,15 +12,15 @@ interface Dash {
   recent: Run[]; usage: Usage;
 }
 
-function Chart({ series }: { series: Dash["series"] }) {
+export function Chart({ series, span = 14 }: { series: Dash["series"]; span?: number }) {
   const days: string[] = [];
-  for (let i = 13; i >= 0; i--) days.push(new Date(Date.now() - i * 864e5).toISOString().slice(0, 10));
+  for (let i = span - 1; i >= 0; i--) days.push(new Date(Date.now() - i * 864e5).toISOString().slice(0, 10));
   const by = Object.fromEntries(series.map((s) => [s.day, s]));
   const tot = (d: string) => ["pass", "review", "quarantine", "block"].reduce((a, k) => a + Number(by[d]?.[k] ?? 0), 0);
   const max = Math.max(1, ...days.map(tot));
-  const W = 560, H = 150, bw = W / 14;
+  const W = 560, H = 150, bw = W / span;
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H + 20}`} role="img" aria-label="Runs per day for the last 14 days, by decision">
+    <svg className="chart" viewBox={`0 0 ${W} ${H + 20}`} role="img" aria-label={`Runs per day for the last ${span} days, by decision`}>
       <line x1="0" x2={W} y1={H} y2={H} />
       {days.map((d, i) => {
         let y = H;
@@ -28,7 +28,7 @@ function Chart({ series }: { series: Dash["series"] }) {
           const n = Number(by[d]?.[k] ?? 0); const h = (n / max) * (H - 10); y -= h;
           return n ? <rect key={k} className={"prqb"[j]} x={i * bw + 6} y={y} width={bw - 12} height={h} rx={2}><title>{`${d}: ${n} ${k}`}</title></rect> : null;
         });
-        return <g key={d}>{bars}{i % 2 === 0 && <text x={i * bw + bw / 2} y={H + 14} textAnchor="middle">{d.slice(5)}</text>}</g>;
+        return <g key={d}>{bars}{(span - 1 - i) % Math.ceil(span / 7) === 0 && <text x={i * bw + bw / 2} y={H + 14} textAnchor="middle">{d.slice(5)}</text>}</g>;
       })}
     </svg>
   );

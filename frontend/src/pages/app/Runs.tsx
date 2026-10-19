@@ -4,7 +4,7 @@ import { useAccount } from "../../lib/account";
 import { useAction, useAsync, usePolling } from "../../lib/hooks";
 import { Link, useRouter } from "../../lib/router";
 import { ago, fmtBytes, fmtDate, pct, titleCase } from "../../lib/format";
-import type { CheckSummary, DecisionDoc, Delivery, Finding, Page, Project, Run, Stage } from "../../lib/types";
+import type { CheckSummary, DecisionDoc, Delivery, FeedbackRow, Finding, Page, Project, Run, Stage, Verdict } from "../../lib/types";
 import { Confirm, DecisionBadge, Digest, Empty, ErrorBox, Modal, PageHeader, Pager, SeverityBadge, Spinner, StateDot, Tabs, CopyButton } from "../../components/ui";
 import { STAGES } from "../../lib/content";
 
@@ -21,7 +21,7 @@ export function RunsList() {
   const set = (k: string) => (e: { target: { value: string } }) => { setOffset(0); setF({ ...f, [k]: e.target.value }); };
   return (
     <>
-      <PageHeader title="Runs" sub="Every validation, with its decision." actions={<Link className="btn primary" to="/app/new">New validation</Link>} />
+      <PageHeader title="Runs" sub="All validations and their decisions." actions={<Link className="btn primary" to="/app/new">New validation</Link>} />
       <div className="row" style={{ marginBottom: 14 }}>
         <input style={{ maxWidth: 260 }} placeholder="Search file name or label" aria-label="Search runs" value={f.q} onChange={set("q")} />
         <select style={{ maxWidth: 170 }} aria-label="Decision" value={f.decision} onChange={set("decision")}><option value="">All decisions</option>{["pass", "review", "quarantine", "block"].map((d) => <option key={d} value={d}>{titleCase(d)}</option>)}</select>
@@ -164,12 +164,18 @@ function Overview({ run, dec }: { run: Run; dec: DecisionDoc | null }) {
 
 function FindingsTab({ id, ready }: { id: string; ready: boolean }) {
   const q = useAsync(() => api.get<{ findings: Finding[]; checks: CheckSummary[]; confidence: any }>(`/runs/${id}/findings`), [id, ready]);
+  const fb = useAsync(() => api.get<FeedbackRow[]>(`/runs/${id}/feedback`).catch(() => [] as FeedbackRow[]), [id, ready]);
+  const { run: act } = useAction();
+  const { can } = useAccount();
   const [open, setOpen] = useState<string | null>(null);
   const [sev, setSev] = useState("");
+  const mine = (fid: string) => fb.data?.find((x) => x.finding_id === fid && x.mine)?.verdict;
+  const tally = (fid: string) => (fb.data ?? []).filter((x) => x.finding_id === fid).length;
+  const rate = (fid: string, verdict: Verdict) => act(() => api.post(`/runs/${id}/findings/${fid}/feedback`, { verdict }), { ok: "Feedback recorded" }).then(() => fb.reload());
   if (q.error) return <ErrorBox error={q.error} retry={q.reload} />;
   if (!q.data) return <Spinner />;
   const list = q.data.findings.filter((f) => !sev || f.severity === sev);
-  const unresolved = q.data.checks.filter((c) => ["unknown", "not_evaluated", "error"].includes(c.status));
+  const unresolved = q.data.checks.filter((c) => ["unknown", "not_evaluated", "error"].includes(c.status) && c.unknown_reason !== "not_applicable");
   return (
     <div className="stack lg">
       {unresolved.length > 0 && (
@@ -194,6 +200,13 @@ function FindingsTab({ id, ready }: { id: string; ready: boolean }) {
                   <dt>Recommended</dt><dd>{f.recommended_action}</dd>
                   <dt>Check</dt><dd><code>{f.check_id}</code>{f.mandatory && " · mandatory"}</dd>
                 </dl>
+                {(can("reviews.resolve") || can("runs.submit")) && (
+                  <div className="rate" role="group" aria-label="Rate this finding" style={{ margin: "8px 0" }}>
+                    <span className="muted small">Was this useful?</span>
+                    {([["useful", "Useful"], ["false_positive", "False positive"], ["unclear", "Unclear"]] as [Verdict, string][]).map(([v, l]) => (
+                      <button key={v} type="button" aria-pressed={mine(f.id) === v} onClick={() => rate(f.id, v)}>{l}</button>))}
+                    {tally(f.id) > 0 && <span className="faint small">{tally(f.id)} rating{tally(f.id) > 1 ? "s" : ""}</span>}
+                  </div>)}
                 {f.pointers.length > 0 && <div><div className="muted small" style={{ marginBottom: 4 }}>Evidence pointers</div>
                   {f.pointers.slice(0, 8).map((p, i) => <div className="ptr small" key={i}><code>{p.path}</code>{p.start !== null && <span className="faint"> [{p.start}–{p.end}]</span>}<div>{p.excerpt}</div></div>)}</div>}
               </div>)}

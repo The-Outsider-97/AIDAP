@@ -20,7 +20,7 @@ export function Baselines() {
   const pname = (id: string) => q.data?.projects.find((p) => p.id === id)?.name ?? id;
   return (
     <>
-      <PageHeader title="Baselines" sub="An approved baseline is the reference a feed or dataset is compared with (drift, schema and volume changes). A second person approves it." actions={can("baselines.propose") && <button className="btn primary" onClick={() => setPropose({ run_id: q.data?.runs[0]?.id ?? "", name: "" })}>Propose from a run</button>} />
+      <PageHeader title="Baselines" sub="Approved references for drift, schema and volume comparison. A second person approves each baseline." actions={can("baselines.propose") && <button className="btn primary" onClick={() => setPropose({ run_id: q.data?.runs[0]?.id ?? "", name: "" })}>Propose from a run</button>} />
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.baselines.length ? <Empty title="No baselines yet">Propose one from a completed run that you consider representative.</Empty> : (
         <div className="tw"><table><thead><tr><th>Baseline</th><th>Project</th><th>Status</th><th>Sample</th><th>Proposed</th><th /></tr></thead>
           <tbody>{q.data.baselines.map((b) => (
@@ -64,7 +64,7 @@ export function Destinations() {
   }
   return (
     <>
-      <PageHeader title="Destinations & webhooks" sub="Where released data and decisions go. Webhooks carry metadata only and are signed. The destination class feeds the privacy rules." actions={manage && <button className="btn primary" onClick={() => setEdit({ klass: "local_index", delivery: "pull", name: "" })}>New destination</button>} />
+      <PageHeader title="Destinations & webhooks" sub="Where released data and decisions go. Webhooks are signed and carry metadata only. The destination class feeds the privacy rules." actions={manage && <button className="btn primary" onClick={() => setEdit({ klass: "local_index", delivery: "pull", name: "" })}>New destination</button>} />
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.length ? <Empty title="No destinations">Without a destination, read released data through the pull gate: <code>GET /runs/&#123;id&#125;/artifact</code>.</Empty> : (
         <div className="tw"><table><thead><tr><th>Name</th><th>Class</th><th>Delivery</th><th>Target</th><th>Enabled</th><th /></tr></thead>
           <tbody>{q.data.map((d) => (
@@ -117,7 +117,7 @@ export function Schedules() {
   }
   return (
     <>
-      <PageHeader title="Schedules" sub="Fetch an HTTPS source on an interval and validate it like any other input." actions={allowed && can("schedules.manage") && q.data && <button className="btn primary" onClick={() => setEdit({ name: "", interval_minutes: 1440, source_url: "https://", project_id: q.data!.projects[0]?.id, profile_id: "api_feed", policy_id: "standard" })}>New schedule</button>} />
+      <PageHeader title="Schedules" sub="Fetch an HTTPS source on an interval and validate it." actions={allowed && can("schedules.manage") && q.data && <button className="btn primary" onClick={() => setEdit({ name: "", interval_minutes: 1440, source_url: "https://", project_id: q.data!.projects[0]?.id, profile_id: "api_feed", policy_id: "standard" })}>New schedule</button>} />
       {!allowed && <div className="alert info" style={{ marginBottom: 16 }}>Scheduled source checks are included from the Team plan. <Link to="/app/billing">See plans</Link></div>}
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.schedules?.length ? <Empty title="No schedules" /> : (
         <div className="tw"><table><thead><tr><th>Schedule</th><th>Every</th><th>Last run</th><th>Next run</th><th>Enabled</th><th /></tr></thead>

@@ -121,7 +121,7 @@ Signature: "v1=" + hex(HMAC_SHA256(secret, f"{timestamp}.{event_id}.{body}"))`;
 export function Docs() {
   return (
     <Doc title="API & SDK" lead="Everything the workspace does is available over a versioned REST API."
-      sections={[["auth", "Authentication"], ["submit", "Submit an input"], ["result", "Read the result"], ["gate", "Pull gate"], ["webhooks", "Webhooks"], ["sdk", "SDK & CI"], ["errors", "Errors"]]}>
+      sections={[["auth", "Authentication"], ["submit", "Submit an input"], ["result", "Read the result"], ["gate", "Pull gate"], ["webhooks", "Webhooks"], ["sdk", "SDK & CI"], ["more", "Suites, metrics and MCP"], ["errors", "Errors"]]}>
       <h2 id="auth">Authentication</h2>
       <p>Create an API key under <b>Workspace → API keys</b> and send it as <code>Authorization: Bearer aidk_…</code>. Keys carry scopes (<code>runs:write</code>, <code>runs:read</code>, <code>deliveries:read</code>, <code>policies:read</code>, <code>usage:read</code>) and may be limited to projects.</p>
       <h2 id="submit">Submit an input</h2>
@@ -141,6 +141,15 @@ export function Docs() {
       <pre>{HOOK}</pre>
       <h2 id="sdk">SDK & CI</h2>
       <pre>{PY}</pre>
+      <h2 id="more">Suites, metrics and MCP</h2>
+      <ul>
+        <li><code>POST /suites/{"{id}"}/run</code> — run adjudicated examples against a profile and policy; <code>aidap suite SUITE_ID --profile ID</code> exits 0 or 1.</li>
+        <li><code>POST /profiles/{"{id}"}/versions/{"{n}"}/publish</code> with <code>suite_ids</code> — stops the publication if an example changes outcome.</li>
+        <li><code>GET /insights</code> — coverage, reliability and review measures; <code>GET /insights/metrics</code> — Prometheus text (Team and above).</li>
+        <li><code>POST /runs/{"{id}"}/findings/{"{fid}"}/feedback</code> — rate a finding. Ratings never change a decision.</li>
+        <li><code>aidap check --gx-result FILE --soda-scan FILE --upstream SOURCE:NAME=STATUS --github</code> — pass upstream check results and emit CI annotations.</li>
+        <li><code>python -m aidap_sdk.mcp</code> — MCP server (<code>aidap_check</code>, <code>aidap_result</code>, <code>aidap_findings</code>); returns decisions and reason codes, never content.</li>
+      </ul>
       <h2 id="errors">Errors</h2>
       <p>Errors use the <code>aidap.error/1</code> envelope: <code>{`{"error": {"code", "message", "details"}, "request_id"}`}</code>. <code>422</code> includes <code>details.fields</code>; <code>429</code> includes <code>Retry-After</code>; <code>402</code> means the plan’s allowance or a plan limit has been reached.</p>
       <p className="muted small">Live API reference for your own installation: <code>/api/v1/meta</code> and the contracts exported by <code>python -m AIDAP export-contracts</code>.</p>

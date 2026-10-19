@@ -3,9 +3,26 @@ import { ApiError } from "./api";
 
 export interface Async<T> { data: T | null; error: ApiError | null; loading: boolean; reload: () => void; set: (v: T | null) => void }
 
+// Short-lived response cache: a page that was visited a moment ago renders at once and refreshes in the background.
+// Entries are keyed by the request function and its dependencies, expire after 30 s and are cleared on sign-out.
+const CACHE = new Map<string, { at: number; data: unknown }>();
+const MAX_AGE_MS = 30_000;
+export const clearAsyncCache = () => CACHE.clear();
+const cacheKey = (fn: unknown, deps: unknown[]) => { try { return `${String(fn)}|${JSON.stringify(deps)}`; } catch { return ""; } };
+const fromCache = <T,>(key: string): T | null => {
+  const hit = key ? CACHE.get(key) : undefined;
+  return hit && Date.now() - hit.at < MAX_AGE_MS ? (hit.data as T) : null;
+};
+const toCache = (key: string, data: unknown) => {
+  if (!key) return;
+  CACHE.set(key, { at: Date.now(), data });
+  if (CACHE.size > 80) CACHE.delete(CACHE.keys().next().value as string);
+};
+
 /** Fetch on mount and whenever ``deps`` change; ignores stale responses. */
 export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>, deps: unknown[] = []): Async<T> {
-  const [state, setState] = useState<{ data: T | null; error: ApiError | null; loading: boolean }>({ data: null, error: null, loading: true });
+  const key = cacheKey(fn, deps);
+  const [state, setState] = useState<{ data: T | null; error: ApiError | null; loading: boolean }>(() => ({ data: fromCache<T>(key), error: null, loading: true }));
   const [tick, setTick] = useState(0);
   const fnRef = useRef(fn);
   fnRef.current = fn;
@@ -13,7 +30,7 @@ export function useAsync<T>(fn: (signal: AbortSignal) => Promise<T>, deps: unkno
     const ac = new AbortController();
     setState((s) => ({ ...s, loading: true, error: null }));
     fnRef.current(ac.signal).then(
-      (data) => !ac.signal.aborted && setState({ data, error: null, loading: false }),
+      (data) => { if (!ac.signal.aborted) { toCache(key, data); setState({ data, error: null, loading: false }); } },
       (e) => { if (!ac.signal.aborted) setState((s) => ({ data: s.data, error: e instanceof ApiError ? e : new ApiError(0, "error", String(e?.message ?? e)), loading: false })); },
     );
     return () => ac.abort();
@@ -74,13 +91,33 @@ export function useAction() {
   return { busy, run };
 }
 
+const THEME_KEY = "aidap-theme";
+const readTheme = () => document.documentElement.dataset.theme === "light" ? "light" : "dark";
+
+/** Apply a theme with a short colour transition (skipped when the visitor prefers reduced motion). */
+function applyTheme(next: string, persist: boolean) {
+  const root = document.documentElement;
+  const calm = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (calm) { root.classList.add("theme-switching"); window.setTimeout(() => root.classList.remove("theme-switching"), 320); }
+  root.dataset.theme = next;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  meta?.setAttribute("content", next === "dark" ? "#050505" : "#f6f7f9");
+  if (persist) { try { localStorage.setItem(THEME_KEY, next); } catch { /* storage may be unavailable */ } }
+  window.dispatchEvent(new Event("aidap:theme"));
+}
+
 export function useTheme(): [string, () => void] {
-  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme ?? "dark");
-  const toggle = useCallback(() => {
-    const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem("aidap-theme", next); } catch { /* storage may be unavailable */ }
-    setTheme(next);
-  }, [theme]);
+  const [theme, setTheme] = useState(readTheme);
+  useEffect(() => {
+    const sync = () => setTheme(readTheme());
+    const media = matchMedia("(prefers-color-scheme: light)");
+    const os = () => { let chosen: string | null = null; try { chosen = localStorage.getItem(THEME_KEY); } catch { /* ignore */ } if (!chosen) applyTheme(media.matches ? "light" : "dark", false); };
+    const storage = (e: StorageEvent) => { if (e.key === THEME_KEY && e.newValue) applyTheme(e.newValue === "light" ? "light" : "dark", false); };
+    window.addEventListener("aidap:theme", sync);
+    window.addEventListener("storage", storage);
+    media.addEventListener("change", os);
+    return () => { window.removeEventListener("aidap:theme", sync); window.removeEventListener("storage", storage); media.removeEventListener("change", os); };
+  }, []);
+  const toggle = useCallback(() => applyTheme(readTheme() === "dark" ? "light" : "dark", true), []);
   return [theme, toggle];
 }

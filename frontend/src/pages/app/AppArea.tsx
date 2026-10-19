@@ -16,6 +16,9 @@ import { ApiKeys, Team } from "./Team";
 import { Billing } from "./Billing";
 import { Alerts, Audit, SystemStatus } from "./Ops";
 import { Settings } from "./Settings";
+import { Insights } from "./Insights";
+import { SuitesList, SuiteDetail } from "./Suites";
+import { AssetsList, AssetDetail } from "./Assets";
 
 const ROUTES: RouteDef[] = [
   { path: "/app", render: () => <Dashboard /> },
@@ -31,6 +34,11 @@ const ROUTES: RouteDef[] = [
   { path: "/app/profiles/:id", render: (p) => <ConfigEditor kind="profile" id={p.id} /> },
   { path: "/app/policies", render: () => <ConfigsList kind="policy" /> },
   { path: "/app/policies/:id", render: (p) => <ConfigEditor kind="policy" id={p.id} /> },
+  { path: "/app/insights", render: () => <Insights /> },
+  { path: "/app/suites", render: () => <SuitesList /> },
+  { path: "/app/suites/:id", render: (p) => <SuiteDetail id={p.id} /> },
+  { path: "/app/assets", render: () => <AssetsList /> },
+  { path: "/app/assets/:id", render: (p) => <AssetDetail id={p.id} /> },
   { path: "/app/baselines", render: () => <Baselines /> },
   { path: "/app/destinations", render: () => <Destinations /> },
   { path: "/app/schedules", render: () => <Schedules /> },
@@ -47,13 +55,13 @@ interface Item { to: string; label: string; perm?: string; badge?: "open_reviews
 const GROUPS: { title: string; items: Item[] }[] = [
   { title: "Validate", items: [
     { to: "/app", label: "Dashboard" }, { to: "/app/new", label: "New validation", perm: "runs.submit" }, { to: "/app/runs", label: "Runs", perm: "runs.read" },
-    { to: "/app/reviews", label: "Reviews", perm: "reviews.read", badge: "open_reviews" }, { to: "/app/quarantine", label: "Quarantine", perm: "reviews.read", badge: "held_quarantine" } ] },
+    { to: "/app/assets", label: "Assets", perm: "runs.read" }, { to: "/app/reviews", label: "Reviews", perm: "reviews.read", badge: "open_reviews" }, { to: "/app/quarantine", label: "Quarantine", perm: "reviews.read", badge: "held_quarantine" } ] },
   { title: "Configure", items: [
     { to: "/app/projects", label: "Projects", perm: "runs.read" }, { to: "/app/profiles", label: "Intended-use profiles", perm: "policies.read" },
-    { to: "/app/policies", label: "Policies", perm: "policies.read" }, { to: "/app/baselines", label: "Baselines", perm: "runs.read" },
+    { to: "/app/policies", label: "Policies", perm: "policies.read" }, { to: "/app/suites", label: "Test suites", perm: "policies.read" }, { to: "/app/baselines", label: "Baselines", perm: "runs.read" },
     { to: "/app/destinations", label: "Destinations & webhooks", perm: "deliveries.read" }, { to: "/app/schedules", label: "Schedules", perm: "runs.read" } ] },
   { title: "Operate", items: [
-    { to: "/app/alerts", label: "Alerts", perm: "alerts.read", badge: "open_alerts" }, { to: "/app/audit", label: "Audit log", perm: "audit.read" },
+    { to: "/app/insights", label: "Insights", perm: "runs.read" }, { to: "/app/alerts", label: "Alerts", perm: "alerts.read", badge: "open_alerts" }, { to: "/app/audit", label: "Audit log", perm: "audit.read" },
     { to: "/app/system", label: "System & SLAI status" } ] },
   { title: "Account", items: [
     { to: "/app/billing", label: "Usage & billing", perm: "usage.read" }, { to: "/app/api-keys", label: "API keys", perm: "apikeys.manage" },
@@ -82,7 +90,9 @@ export function AppArea() {
         ))}
       </nav>
       <div className="main">
+        <div key={path.split("/").slice(0, 4).join("/")} className="page-in">
         <Routes routes={ROUTES} fallback={<Empty title="Page not found" action={<Link className="btn" to="/app">Back to dashboard</Link>}>That page doesn’t exist in the workspace.</Empty>} />
+        </div>
       </div>
     </div>
   );

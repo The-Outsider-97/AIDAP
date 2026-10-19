@@ -14,7 +14,7 @@ export function QuarantineList() {
   const q = useAsync(() => api.get<Q[]>("/quarantine", { state, limit: 100 }), [state]);
   return (
     <>
-      <PageHeader title="Quarantine" sub="Isolated inputs. Reading the content needs a stated purpose, is time-limited and is logged." />
+      <PageHeader title="Quarantine" sub="Isolated inputs. Content access requires a stated purpose, is time-limited and is logged." />
       <div className="row" style={{ marginBottom: 14 }}><select style={{ maxWidth: 200 }} aria-label="State" value={state} onChange={(e) => setState(e.target.value)}>
         <option value="held">Held</option><option value="disposed">Disposed</option><option value="">All</option></select></div>
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.length ? <Empty title="Nothing in quarantine" /> : (

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, ApiError } from "./api";
+import { clearAsyncCache } from "./hooks";
 import type { Me } from "./types";
 
 interface Account {
@@ -23,7 +24,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
   useEffect(() => {
-    const on = () => setMe(null);
+    const on = () => { clearAsyncCache(); setMe(null); };
     window.addEventListener("aidap:unauthenticated", on);
     return () => window.removeEventListener("aidap:unauthenticated", on);
   }, []);
@@ -31,9 +32,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Account>(() => ({
     me, loading, refresh, authOpen,
     openAuth: setAuthOpen, closeAuth: () => setAuthOpen(null),
-    login: async (b) => { const r = await api.post<{ me: Me }>("/auth/login", b); setMe(r.me); return r.me; },
-    signup: async (b) => { const r = await api.post<{ me: Me }>("/auth/signup", b); setMe(r.me); return r.me; },
-    logout: async () => { try { await api.post("/auth/logout"); } finally { setMe(null); } },
+    login: async (b) => { const r = await api.post<{ me: Me }>("/auth/login", b); clearAsyncCache(); setMe(r.me); return r.me; },
+    signup: async (b) => { const r = await api.post<{ me: Me }>("/auth/signup", b); clearAsyncCache(); setMe(r.me); return r.me; },
+    logout: async () => { try { await api.post("/auth/logout"); } finally { clearAsyncCache(); setMe(null); } },
     can: (p) => !!me?.permissions.includes(p),
   }), [me, loading, refresh, authOpen]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

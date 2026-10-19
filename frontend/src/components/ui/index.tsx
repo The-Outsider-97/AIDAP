@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ApiError } from "../../lib/api";
 import type { Decision, Severity } from "../../lib/types";
 import { Link } from "../../lib/router";
-import { useToast } from "../../lib/hooks";
+import { useTheme, useToast } from "../../lib/hooks";
 
 const GLYPH: Record<string, string> = { pass: "✓", review: "!", quarantine: "■", block: "✕" };
 export const DECISION_TEXT: Record<string, string> = {
@@ -28,8 +28,33 @@ export function DecisionBadge({ decision, big, state }: { decision?: Decision | 
 export const SeverityBadge = ({ severity }: { severity: Severity | string }) => <span className={`sev ${severity}`}>{severity}</span>;
 export const StateDot = ({ state }: { state: string }) => <span className={`state ${state}`}>{state.replaceAll("_", " ")}</span>;
 
-export function Spinner({ label = "Loading" }: { label?: string }) {
-  return <div className="center" role="status"><span className="spin" /><span className="sr">{label}</span></div>;
+/** Placeholder shown while data loads. Reserves the space the content will use so the page does not jump. */
+export function Spinner({ label = "Loading", rows = 4 }: { label?: string; rows?: number }) {
+  return (
+    <div className="skel-wrap" role="status" aria-busy="true">
+      <span className="sr">{label}</span>
+      <div className="skel title" />
+      <div className="skel-grid"><div className="skel card" /><div className="skel card" /><div className="skel card" /></div>
+      {Array.from({ length: rows }, (_, i) => <div key={i} className="skel line" style={{ width: `${92 - (i % 3) * 14}%` }} />)}
+    </div>
+  );
+}
+
+/** Light/dark switch. A real switch for assistive technology; the icon shows the theme you will get. */
+export function ThemeToggle({ compact }: { compact?: boolean }) {
+  const [theme, toggle] = useTheme();
+  const dark = theme === "dark";
+  return (
+    <button type="button" role="switch" aria-checked={!dark} className={`theme-toggle${compact ? " compact" : ""}`} onClick={toggle}
+      title={dark ? "Switch to light theme" : "Switch to dark theme"} aria-label="Light theme">
+      <span className="track" aria-hidden>
+        <svg className="sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+        <svg className="moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" /></svg>
+        <i className="knob" />
+      </span>
+      {!compact && <span className="lbl">{dark ? "Dark" : "Light"}</span>}
+    </button>
+  );
 }
 
 export function ErrorBox({ error, retry }: { error: ApiError | Error | string; retry?: () => void }) {

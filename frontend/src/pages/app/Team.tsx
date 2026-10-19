@@ -74,7 +74,7 @@ export function ApiKeys() {
   const { busy, run: act } = useAction();
   return (
     <>
-      <PageHeader title="API keys" sub="Use a key to submit inputs and read results from CI or your pipeline." actions={<button className="btn primary" onClick={() => setEdit({ name: "", scopes: ["runs:write", "runs:read"], project_ids: [], days: "" })}>Create key</button>} />
+      <PageHeader title="API keys" sub="Keys for submitting inputs and reading results from CI or pipelines." actions={<button className="btn primary" onClick={() => setEdit({ name: "", scopes: ["runs:write", "runs:read"], project_ids: [], days: "" })}>Create key</button>} />
       {q.error ? <ErrorBox error={q.error} retry={q.reload} /> : !q.data ? <Spinner /> : !q.data.length ? <Empty title="No API keys" /> : (
         <div className="tw"><table><thead><tr><th>Name</th><th>Prefix</th><th>Scopes</th><th>Last used</th><th>Expires</th><th /></tr></thead>
           <tbody>{q.data.map((k) => (

@@ -13,7 +13,7 @@ export function ReviewsList() {
   const q = useAsync(() => api.get<Review[]>("/reviews", { state, limit: 100 }), [state]);
   return (
     <>
-      <PageHeader title="Reviews" sub="Inputs held for a person. Approve a time-limited exception, reject, or ask for a repaired version." />
+      <PageHeader title="Reviews" sub="Inputs held for review: approve a time-limited exception, reject, or request a repair." />
       <div className="row" style={{ marginBottom: 14 }}>
         <select style={{ maxWidth: 200 }} aria-label="State" value={state} onChange={(e) => setState(e.target.value)}>
           <option value="open">Open</option><option value="resolved">Resolved</option><option value="">All</option></select>

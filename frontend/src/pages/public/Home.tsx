@@ -58,7 +58,9 @@ export function Home() {
           <div className="card feature"><h3><Icon name="lock" />Fail-closed rules</h3><p className="muted">If a mandatory check cannot run, the result is never a Pass. Credentials, malware and tool-injection findings cannot be waived by anyone.</p></div>
           <div className="card feature"><h3><Icon name="flow" />Intended-use profiles</h3><p className="muted">Data is not “good” in general. Choose a profile — RAG indexing, agent memory, external-LLM submission, training sets, dataset uploads or API feeds — and policies tuned to the destination.</p></div>
           <div className="card feature"><h3><Icon name="shield" />Human review, with duties separated</h3><p className="muted">Exceptions are time-limited and need the role your policy names. Submitters cannot approve their own exceptions when another reviewer is available.</p></div>
-          <div className="card feature"><h3><Icon name="plug" />API, SDK, CI</h3><p className="muted">Gate pipelines with a single call. The CLI exits 0 / 10 / 20 / 30 for Pass / Review / Quarantine / Block.</p></div>
+          <div className="card feature"><h3><Icon name="plug" />API, SDK, CI</h3><p className="muted">Gate pipelines with a single call. The CLI exits 0 / 10 / 20 / 30 for Pass / Review / Quarantine / Block, reads Great Expectations and Soda results, and annotates GitHub runs.</p></div>
+          <div className="card feature"><h3><Icon name="scan" />Test before you publish</h3><p className="muted">Keep adjudicated examples in a suite. A policy or profile change that alters an outcome is stopped before it goes live.</p></div>
+          <div className="card feature"><h3><Icon name="doc" />Measures that matter</h3><p className="muted">Mandatory-check completion, review time, exceptions approved and finding usefulness, with Prometheus export.</p></div>
         </div>
       </div></section>
 

@@ -3,7 +3,7 @@ import { Link, useRouter } from "../../lib/router";
 import { useAccount } from "../../lib/account";
 import { useAction, useTheme, useToast } from "../../lib/hooks";
 import { api } from "../../lib/api";
-import { Field, Modal } from "../ui";
+import { Field, Modal, ThemeToggle } from "../ui";
 
 export const BUSINESS_EMAIL = "info.remy3design@gmail.com";
 
@@ -30,6 +30,14 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const { me, openAuth, logout } = useAccount();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest?.("[data-account-menu]")) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [open]);
   return (
     <header className="hdr">
       <div className="wrap">
@@ -41,11 +49,12 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           <Link to="/trust" className={path === "/trust" ? "on" : ""}>Trust</Link>
         </nav>
         <span className="sp" />
+        <ThemeToggle />
         {me ? (
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative" }} data-account-menu>
             <button className="btn sm" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-haspopup="menu">{me.user.name} ▾</button>
             {open && (
-              <div role="menu" className="card tight" style={{ position: "absolute", right: 0, top: 44, minWidth: 220, zIndex: 80 }}>
+              <div role="menu" className="card tight menu">
                 <div className="muted small" style={{ marginBottom: 8 }}>{me.tenant.name} · {me.role} · {me.plan.name}</div>
                 <div className="stack" style={{ gap: 4 }}>
                   <Link to="/app" className="btn sm ghost">Open workspace</Link>
@@ -91,7 +100,6 @@ export function NavigationPanel({ open, onClose, onContact }: { open: boolean; o
 }
 
 export function SidePanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [theme, toggle] = useTheme();
   const [toc, setToc] = useState<{ id: string; text: string }[]>([]);
   const { path } = useRouter();
   useEffect(() => {
@@ -105,7 +113,7 @@ export function SidePanel({ open, onClose }: { open: boolean; onClose: () => voi
         <h4>On this page</h4>
         {toc.length ? toc.map((t) => <a key={t.id} className="item" href={`#${t.id}`} onClick={onClose}>{t.text}</a>) : <p className="muted small">No sections on this page.</p>}
         <h4>Appearance</h4>
-        <button className="item" onClick={toggle} aria-pressed={theme === "light"}>{theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}</button>
+        <div className="item static"><span>Theme</span><ThemeToggle /></div>
         <h4>More</h4>
         <Link className="item" to="/pricing" onClick={onClose}>Plans & pricing</Link>
         <p className="faint small" style={{ marginTop: 28 }}>Powered by SLAI</p>
@@ -184,6 +192,8 @@ export function ContactModal({ onClose, topic = "enterprise" }: { onClose: () =>
 }
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { path } = useRouter();
+  const routeKey = path.startsWith("/app") ? "app" : path;         // the workspace animates its own pages; public pages animate here
   const [nav, setNav] = useState(false);
   const [side, setSide] = useState(false);
   const [contact, setContact] = useState(false);
@@ -198,7 +208,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <Header onMenu={() => setNav(true)} />
       <NavigationPanel open={nav} onClose={() => setNav(false)} onContact={() => setContact(true)} />
       <SidePanel open={side} onClose={() => setSide(false)} />
-      <main id="main">{children}</main>
+      <main id="main" key={routeKey} className="page-in">{children}</main>
       <Footer onContact={() => setContact(true)} />
       <FloatingLogoButton onClick={() => setSide(true)} />
       {contact && <ContactModal onClose={() => setContact(false)} />}

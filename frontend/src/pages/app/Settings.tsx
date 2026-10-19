@@ -9,7 +9,7 @@ export function Settings() {
   const [theme, toggle] = useTheme();
   const [pw, setPw] = useState({ current_password: "", new_password: "" });
   const [pwErr, setPwErr] = useState("");
-  const [org, setOrg] = useState({ name: me?.tenant.name ?? "", retention_days: me?.tenant.retention_days ?? "" });
+  const [org, setOrg] = useState({ name: me?.tenant.name ?? "", retention_days: me?.tenant.retention_days ?? "", review_sla_hours: me?.tenant.settings?.review_sla_hours ?? 72 });
   const [orgErr, setOrgErr] = useState("");
   const [mfa, setMfa] = useState<null | { secret: string; uri: string }>(null);
   const [code, setCode] = useState("");
@@ -45,9 +45,10 @@ export function Settings() {
             <Field label="Name"><input value={org.name} onChange={(e) => setOrg({ ...org, name: e.target.value })} /></Field>
             <Field label="Evidence retention (days)" hint={canRetention ? "Leave empty to use your plan’s default." : `Your ${me.plan.name} plan keeps evidence for ${me.plan.evidence_retention_days} days. Configurable retention is a Business feature.`}>
               <input type="number" min={1} max={3650} disabled={!canRetention} value={org.retention_days ?? ""} onChange={(e) => setOrg({ ...org, retention_days: e.target.value as any })} /></Field>
+            <Field label="Review target (hours)" hint="Open reviews older than this are flagged in Insights and raise one alert."><input type="number" min={1} max={720} value={org.review_sla_hours} onChange={(e) => setOrg({ ...org, review_sla_hours: e.target.value as any })} /></Field>
             {orgErr && <div className="alert error" role="alert">{orgErr}</div>}
             <button className="btn" disabled={busy} onClick={async () => { setOrgErr("");
-              const body: Record<string, unknown> = { name: org.name }; if (canRetention) body.retention_days = org.retention_days === "" ? null : Number(org.retention_days);
+              const body: Record<string, unknown> = { name: org.name, review_sla_hours: Number(org.review_sla_hours) || 72 }; if (canRetention) body.retention_days = org.retention_days === "" ? null : Number(org.retention_days);
               if (await act(() => api.patch("/tenant", body), { ok: "Saved", onError: (e) => setOrgErr(Object.values(e.fields)[0] ?? e.message) })) await refresh(); }}>Save</button>
             {me.role === "owner" && (<>
               <h3 style={{ marginTop: 22 }}>Your data</h3>

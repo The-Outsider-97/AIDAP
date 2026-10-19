@@ -51,3 +51,33 @@ export interface Usage {
   period: string; plan: Plan; subscription: Doc; used: { runs: number; scan_bytes: number; scan_gb: number; inference_cents: number; cpu_ms: number; projects: number; seats: number };
   limits: { runs: number; scan_bytes: number; inference_cents: number; projects: number; seats: number }; ratios: Record<string, number | null>;
 }
+
+export type Verdict = "useful" | "false_positive" | "unclear";
+export interface FeedbackRow { finding_id: string; verdict: Verdict; note: string; actor: string; mine: boolean; created_at: string }
+export interface Insights {
+  window_days: number; project_id: string | null; generated_at: string;
+  runs: { total: number; finished: number; by_decision: Record<string, number>; pass_rate: number | null; hold_rate: number | null };
+  reliability: { unhandled_errors: number; error_rate: number | null; mandatory_check_completion: number | null; unsupported_input_rate: number | null; sampled_runs: number;
+    delivery: { sent: number; failed: number; retried: number; integrity_stops: number } };
+  review: { opened: number; resolved: number; open: number; overturned: number; overturn_rate: number | null; repair_requested: number; rejected: number;
+    time_to_resolve_hours: { median: number | null; p90: number | null }; sla_hours: number; overdue: number; oldest_open_hours: number | null; held_quarantine: number };
+  feedback: { total: number; verdicts: Record<Verdict, number>; usefulness: number | null };
+  checks: { check_id: string; runs: number; failed: number; unknown: number; findings: number; rated: number; usefulness: number | null; unknown_rate: number | null }[];
+  top_findings: { code: string; check_id: string; count: number; runs: number; rated: number; false_positive: number; usefulness: number | null }[];
+  series: ({ day: string } & Record<string, number | string>)[];
+  definitions: Record<string, string>;
+}
+export interface SuiteSummary { id: string; name: string; description: string; project_id: string; cases: number; created_at: string; created_by: string;
+  last_run: null | { id: string; created_at: string; summary: SuiteRunSummary; profile_ref: string; policy_ref: string } }
+export interface SuiteRunSummary { total: number; passed: number; failed: number; errors: number; looser_than_expected: number; stricter_than_expected: number; changed_since_last_run: number; all_passed: boolean }
+export interface SuiteCase { id: string; name: string; expected: Decision; expected_codes: string[]; filename: string; destination: string; source_class: string; classification: string; note: string; size: number; created_at: string }
+export interface SuiteCaseResult { case_id: string; name: string; expected: Decision; actual: Decision | null; ok: boolean; direction: "looser" | "stricter" | null; missing_codes: string[]; codes: string[]; error: string; changed: boolean; was: Decision | null }
+export interface SuiteRun { id: string; suite_id: string; suite_name: string; created_at: string; created_by: string; profile_ref: string; policy_ref: string; summary: SuiteRunSummary; cases: SuiteCaseResult[]; note: string }
+export interface SuiteFull extends Omit<SuiteSummary, "cases" | "last_run"> { cases: SuiteCase[]; runs: SuiteRun[] }
+export interface AssetRow { id: string; name: string; project_id: string; runs: number; versions: number; latest_run: string; latest_decision: Decision | null; latest_state: string; last_seen_at: string; first_seen_at: string; passed: number; held: number; released_to: string[] }
+export interface AssetHistory {
+  asset: { id: string; name: string; project_id: string; created_at: string; source_class: string; classification: string };
+  versions: { version_id: string; version_no: number; digest: string; size: number; runs: number; first_seen_at: string }[];
+  timeline: { run_id: string; created_at: string; version_no: number; decision: Decision | null; state: string; reason_codes: string[]; new_reasons: string[]; cleared_reasons: string[]; profile: string; policy: string; destination_id: string | null; label: string; same_content_as_previous: boolean }[];
+}
+export interface Suggestion { profile: Doc; columns: Record<string, any>[] | Doc; sensitive_types: string[]; records: number; format: string; notes: string[]; lint: { issues: { level: string; path: string; message: string }[]; errors: number; warnings: number; publishable: boolean }; stored: boolean; next: string }
